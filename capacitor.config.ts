@@ -1,12 +1,12 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.dktelecom.dkonline',
-  appName: 'DK Online',
+  appId: 'br.gov.pe.manari.app',
+  appName: 'Prefeitura de Manari',
   webDir: 'www',
   android: {
     allowMixedContent: false,
-    backgroundColor: '#020817'
+    backgroundColor: '#f7f5ed'
   },
   server: {
     androidScheme: 'https'

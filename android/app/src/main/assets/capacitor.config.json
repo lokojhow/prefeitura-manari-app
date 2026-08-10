@@ -1,12 +1,12 @@
 {
-	"appId": "com.dktelecom.dkonline",
-	"appName": "DK Online",
-	"webDir": "www",
-	"android": {
-		"allowMixedContent": false,
-		"backgroundColor": "#020817"
-	},
-	"server": {
-		"androidScheme": "https"
-	}
+  "appId": "br.gov.pe.manari.app",
+  "appName": "Prefeitura de Manari",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#f7f5ed"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
 }

@@ -1,8 +1,8 @@
 {
-  "name": "dk-online-android",
-  "version": "0.1.0",
+  "name": "prefeitura-manari-android",
+  "version": "1.0.0",
   "private": true,
-  "description": "DK Online Android app",
+  "description": "Aplicativo oficial da Prefeitura Municipal de Manari",
   "scripts": {
     "sync": "npx cap sync android",
     "open": "npx cap open android",

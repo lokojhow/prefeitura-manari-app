@@ -1,4 +1,4 @@
-name: Gerar APK DK Online
+name: Gerar APK Prefeitura de Manari V1.0
 
 on:
   workflow_dispatch:
@@ -11,77 +11,48 @@ on:
       - "package.json"
       - "package-lock.json"
       - "capacitor.config.ts"
-      - "capacitor.config.json"
       - ".github/workflows/build-apk.yml"
 
 jobs:
   build-apk:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
       - name: Baixar projeto
         uses: actions/checkout@v4
-
       - name: Preparar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
-
       - name: Preparar Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
           cache: gradle
-
       - name: Preparar Android SDK
         uses: android-actions/setup-android@v3
-
       - name: Instalar Android 36
         run: |
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
-
       - name: Instalar dependências
         run: |
           rm -rf node_modules
-          rm -f package-lock.json
           npm config set registry https://registry.npmjs.org/
-          npm install --no-audit --no-fund --package-lock=false
-
-      - name: Preparar configuração do Capacitor
-        run: |
-          rm -f capacitor.config.ts
-          cat > capacitor.config.json <<'EOF'
-          {
-            "appId": "com.dktelecom.dkonline",
-            "appName": "DK Online",
-            "webDir": "www",
-            "android": {
-              "allowMixedContent": false,
-              "backgroundColor": "#020817"
-            },
-            "server": {
-              "androidScheme": "https"
-            }
-          }
-          EOF
-
+          npm install --no-audit --no-fund
       - name: Sincronizar Capacitor
         run: npx cap sync android
-
-      - name: Gerar APK de teste
+      - name: Gerar APK V1.0
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
-
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
-          name: DK-Online-APK-Teste
+          name: Prefeitura-Manari-V1.0-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
