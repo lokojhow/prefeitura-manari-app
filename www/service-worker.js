@@ -1,5 +1,5 @@
-const CACHE='manari-v1-3-1-portal-editavel';
-const CORE=['./','index.html','styles.css','app.js','config.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
+const CACHE='manari-v1-3-2-nav-stable';
+const CORE=['./','index.html','styles.css','app.js','config.js','nav-fix.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
 const SUPABASE_CDN='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
 
 self.addEventListener('install',e=>e.waitUntil(
@@ -29,6 +29,25 @@ async function prepareResponse(request,response){
     });
   }
 
+  if(request.mode==='navigate'){
+    const type=response.headers.get('content-type')||'';
+    if(type.includes('text/html')){
+      let html=await response.text();
+      if(!html.includes('nav-fix.js')){
+        const tag='<script src="nav-fix.js"></script>';
+        html=html.includes('</body>')?html.replace('</body>',`${tag}</body>`):`${html}${tag}`;
+      }
+      const headers=new Headers(response.headers);
+      headers.set('Content-Type','text/html; charset=utf-8');
+      headers.delete('Content-Length');
+      return new Response(html,{
+        status:response.status,
+        statusText:response.statusText,
+        headers
+      });
+    }
+  }
+
   return response;
 }
 
@@ -49,7 +68,10 @@ self.addEventListener('fetch',e=>{
           }
           return prepared;
         })
-        .catch(()=>caches.match('index.html'))
+        .catch(async()=>{
+          const cached=await caches.match('index.html');
+          return prepareResponse(e.request,cached);
+        })
     );
     return;
   }
