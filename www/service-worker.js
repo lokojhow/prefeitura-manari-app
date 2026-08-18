@@ -1,4 +1,4 @@
-const CACHE='manari-v1-2-3-nav-fix';
+const CACHE='manari-v1-3-0-portal-oficial';
 const CORE=['./','index.html','styles.css','app.js','config.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
 
 self.addEventListener('install',e=>e.waitUntil(
