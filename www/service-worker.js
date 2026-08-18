@@ -1,5 +1,5 @@
-const CACHE='manari-v1-3-4-secretarias-stable';
-const CORE=['./','index.html','styles.css','app.js','config.js','nav-fix.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
+const CACHE='manari-v1-3-5-laws';
+const CORE=['./','index.html','styles.css','app.js','config.js','nav-fix.js','laws.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
 const SUPABASE_CDN='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
 
 self.addEventListener('install',e=>e.waitUntil(
@@ -33,9 +33,12 @@ async function prepareResponse(request,response){
     const type=response.headers.get('content-type')||'';
     if(type.includes('text/html')){
       let html=await response.text();
-      if(!html.includes('nav-fix.js')){
-        const tag='<script src="nav-fix.js"></script>';
-        html=html.includes('</body>')?html.replace('</body>',`${tag}</body>`):`${html}${tag}`;
+      const scripts=[];
+      if(!html.includes('nav-fix.js')) scripts.push('<script src="nav-fix.js"></script>');
+      if(!html.includes('laws.js')) scripts.push('<script src="laws.js"></script>');
+      if(scripts.length){
+        const tags=scripts.join('');
+        html=html.includes('</body>')?html.replace('</body>',`${tags}</body>`):`${html}${tags}`;
       }
       const headers=new Headers(response.headers);
       headers.set('Content-Type','text/html; charset=utf-8');
