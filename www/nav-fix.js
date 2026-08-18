@@ -1,126 +1,92 @@
-// Prefeitura de Manari — correção robusta da navegação horizontal das secretarias.
-// Mantém scrollY e scrollLeft durante renderizações síncronas e assíncronas.
+// Prefeitura de Manari — navegação horizontal estável das secretarias.
+// Novo padrão: a secretaria tocada vira a referência da faixa e permanece visível/centralizada.
+// Não tenta mais preservar um scrollLeft antigo, evitando conflito com rerenderizações do app.
 (() => {
   const STRIP = '.secretaria-strip';
   const CHIP = '.secretaria-chip[data-dept]';
 
-  let state = null;
-  let restoring = false;
-  let lastKnownLeft = 0;
-  let lastStrip = null;
-  let releaseTimer = 0;
-  let restoreTimers = [];
+  let selectedDept = null;
+  let savedTop = null;
+  let activeUntil = 0;
+  let timers = [];
+  let raf = 0;
 
   const getStrip = () => document.querySelector(STRIP);
 
-  const rememberNaturalScroll = () => {
-    const strip = getStrip();
-    if (!strip) return;
-    if (strip !== lastStrip) lastStrip = strip;
-    if (!restoring && !state) lastKnownLeft = strip.scrollLeft;
+  const getChip = (strip, dept) => {
+    if (!strip || !dept) return null;
+    return Array.from(strip.querySelectorAll(CHIP))
+      .find(chip => chip.dataset.dept === dept) || null;
   };
 
-  const keepActiveVisible = (strip, dept) => {
-    if (!strip || !dept) return;
-    const active = Array.from(strip.querySelectorAll(CHIP))
-      .find(chip => chip.dataset.dept === dept);
-    if (!active) return;
+  const centerSelected = () => {
+    if (!selectedDept || Date.now() > activeUntil) return;
 
-    const stripRect = strip.getBoundingClientRect();
-    const activeRect = active.getBoundingClientRect();
-    const gap = 8;
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      const strip = getStrip();
+      const chip = getChip(strip, selectedDept);
 
-    if (activeRect.left < stripRect.left + gap) {
-      strip.scrollLeft -= (stripRect.left + gap) - activeRect.left;
-    } else if (activeRect.right > stripRect.right - gap) {
-      strip.scrollLeft += activeRect.right - (stripRect.right - gap);
-    }
-  };
+      if (strip && chip) {
+        const max = Math.max(0, strip.scrollWidth - strip.clientWidth);
+        const target = Math.max(
+          0,
+          Math.min(
+            max,
+            chip.offsetLeft - ((strip.clientWidth - chip.offsetWidth) / 2)
+          )
+        );
 
-  const restore = () => {
-    if (!state) return;
-    const strip = getStrip();
-    restoring = true;
-
-    window.scrollTo({ top: state.top, left: 0, behavior: 'auto' });
-
-    if (strip) {
-      // Primeiro devolve exatamente a posição em que o usuário estava.
-      strip.scrollLeft = state.left;
-      // Só desloca o mínimo necessário se o item tocado tiver ficado fora da área visível.
-      keepActiveVisible(strip, state.dept);
-      state.left = strip.scrollLeft;
-      lastKnownLeft = strip.scrollLeft;
-    }
-
-    // Qualquer ajuste horizontal deve ser neutro no eixo vertical.
-    window.scrollTo({ top: state.top, left: 0, behavior: 'auto' });
-
-    requestAnimationFrame(() => {
-      restoring = false;
-    });
-  };
-
-  const scheduleRestores = () => {
-    restoreTimers.forEach(clearTimeout);
-    restoreTimers = [];
-    // Cobre renderizações imediatas, transições e hidratações atrasadas do app.
-    [0, 16, 50, 120, 250, 500, 900, 1400, 2200, 3200].forEach(delay => {
-      restoreTimers.push(setTimeout(restore, delay));
-    });
-
-    clearTimeout(releaseTimer);
-    releaseTimer = setTimeout(() => {
-      if (state) {
-        restore();
-        lastKnownLeft = state.left;
+        // Sem animação para impedir que a renderização do app dispute com a posição da faixa.
+        strip.scrollLeft = target;
       }
-      state = null;
-      restoring = false;
-    }, 3600);
+
+      if (savedTop !== null) {
+        window.scrollTo({ top: savedTop, left: 0, behavior: 'auto' });
+      }
+    });
   };
 
-  document.addEventListener('scroll', event => {
-    const strip = event.target?.closest?.(STRIP) || (event.target?.matches?.(STRIP) ? event.target : null);
-    if (!strip || restoring || state) return;
-    lastKnownLeft = strip.scrollLeft;
-  }, true);
+  const runStabilization = () => {
+    timers.forEach(clearTimeout);
+    timers = [];
 
-  document.addEventListener('touchend', rememberNaturalScroll, true);
-  document.addEventListener('pointerup', rememberNaturalScroll, true);
+    // Mantém a secretaria tocada como referência durante todo o ciclo de renderização.
+    [0, 16, 40, 80, 140, 220, 350, 550, 800, 1100, 1500, 2000, 2600].forEach(delay => {
+      timers.push(setTimeout(centerSelected, delay));
+    });
+
+    activeUntil = Date.now() + 3000;
+    timers.push(setTimeout(() => {
+      centerSelected();
+      savedTop = null;
+    }, 3000));
+  };
 
   document.addEventListener('click', event => {
     const chip = event.target.closest?.(CHIP);
     if (!chip) return;
 
-    const strip = chip.closest(STRIP) || getStrip();
-    const left = strip ? strip.scrollLeft : lastKnownLeft;
-    state = {
-      top: window.scrollY,
-      left: Number.isFinite(left) ? left : lastKnownLeft,
-      dept: chip.dataset.dept
-    };
-    lastKnownLeft = state.left;
-    scheduleRestores();
+    selectedDept = chip.dataset.dept;
+    savedTop = window.scrollY;
+    activeUntil = Date.now() + 3000;
+    runStabilization();
   }, true);
 
+  // Se o aplicativo recriar a faixa ou os chips depois do clique, recentraliza o item escolhido.
   const observer = new MutationObserver(() => {
-    if (state) {
-      restore();
-    } else {
-      const strip = getStrip();
-      if (strip && lastKnownLeft > 0 && strip.scrollLeft === 0) {
-        // Se a faixa foi recriada pelo render, recupera a última posição conhecida.
-        strip.scrollLeft = lastKnownLeft;
-      }
-    }
+    if (selectedDept && Date.now() <= activeUntil) centerSelected();
   });
-
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
-  // Guarda a posição mesmo quando o navegador recria a faixa sem disparar clique.
-  window.addEventListener('pageshow', () => {
+  // Em resize/orientação, mantém a secretaria atual visível sem mexer no eixo vertical.
+  window.addEventListener('resize', () => {
+    if (!selectedDept) return;
     const strip = getStrip();
-    if (strip && lastKnownLeft > 0) strip.scrollLeft = lastKnownLeft;
+    const chip = getChip(strip, selectedDept);
+    if (!strip || !chip) return;
+
+    const max = Math.max(0, strip.scrollWidth - strip.clientWidth);
+    strip.scrollLeft = Math.max(0, Math.min(max, chip.offsetLeft - ((strip.clientWidth - chip.offsetWidth) / 2)));
   });
 })();
