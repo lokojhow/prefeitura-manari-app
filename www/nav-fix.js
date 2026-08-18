@@ -1,6 +1,6 @@
 // Prefeitura de Manari — navegação horizontal estável das secretarias.
-// Novo padrão: a secretaria tocada vira a referência da faixa e permanece visível/centralizada.
-// Não tenta mais preservar um scrollLeft antigo, evitando conflito com rerenderizações do app.
+// Esta rotina é a autoridade final sobre a posição da faixa enquanto uma secretaria é trocada.
+// Ela neutraliza reposicionamentos concorrentes causados por rerenderizações assíncronas.
 (() => {
   const STRIP = '.secretaria-strip';
   const CHIP = '.secretaria-chip[data-dept]';
@@ -10,6 +10,8 @@
   let activeUntil = 0;
   let timers = [];
   let raf = 0;
+  let correcting = false;
+  let observedStrip = null;
 
   const getStrip = () => document.querySelector(STRIP);
 
@@ -17,6 +19,18 @@
     if (!strip || !dept) return null;
     return Array.from(strip.querySelectorAll(CHIP))
       .find(chip => chip.dataset.dept === dept) || null;
+  };
+
+  const getTargetLeft = (strip, chip) => {
+    if (!strip || !chip) return 0;
+    const max = Math.max(0, strip.scrollWidth - strip.clientWidth);
+    return Math.max(
+      0,
+      Math.min(
+        max,
+        chip.offsetLeft - ((strip.clientWidth - chip.offsetWidth) / 2)
+      )
+    );
   };
 
   const centerSelected = () => {
@@ -28,39 +42,48 @@
       const chip = getChip(strip, selectedDept);
 
       if (strip && chip) {
-        const max = Math.max(0, strip.scrollWidth - strip.clientWidth);
-        const target = Math.max(
-          0,
-          Math.min(
-            max,
-            chip.offsetLeft - ((strip.clientWidth - chip.offsetWidth) / 2)
-          )
-        );
-
-        // Sem animação para impedir que a renderização do app dispute com a posição da faixa.
-        strip.scrollLeft = target;
+        const target = getTargetLeft(strip, chip);
+        if (Math.abs(strip.scrollLeft - target) > 1) {
+          correcting = true;
+          strip.scrollLeft = target;
+          requestAnimationFrame(() => { correcting = false; });
+        }
       }
 
-      if (savedTop !== null) {
+      if (savedTop !== null && Math.abs(window.scrollY - savedTop) > 1) {
         window.scrollTo({ top: savedTop, left: 0, behavior: 'auto' });
       }
     });
+  };
+
+  const bindStripGuard = () => {
+    const strip = getStrip();
+    if (!strip || strip === observedStrip) return;
+
+    observedStrip = strip;
+    strip.addEventListener('scroll', () => {
+      if (correcting || !selectedDept || Date.now() > activeUntil) return;
+      // Qualquer rotina antiga que tente recolocar a faixa em outra posição é corrigida no mesmo ciclo.
+      centerSelected();
+    }, { passive: true });
   };
 
   const runStabilization = () => {
     timers.forEach(clearTimeout);
     timers = [];
 
-    // Mantém a secretaria tocada como referência durante todo o ciclo de renderização.
-    [0, 16, 40, 80, 140, 220, 350, 550, 800, 1100, 1500, 2000, 2600].forEach(delay => {
-      timers.push(setTimeout(centerSelected, delay));
+    activeUntil = Date.now() + 4500;
+    [0, 16, 32, 50, 80, 120, 180, 260, 360, 500, 700, 950, 1250, 1600, 2100, 2800, 3600, 4400].forEach(delay => {
+      timers.push(setTimeout(() => {
+        bindStripGuard();
+        centerSelected();
+      }, delay));
     });
 
-    activeUntil = Date.now() + 3000;
     timers.push(setTimeout(() => {
       centerSelected();
       savedTop = null;
-    }, 3000));
+    }, 4550));
   };
 
   document.addEventListener('click', event => {
@@ -69,24 +92,25 @@
 
     selectedDept = chip.dataset.dept;
     savedTop = window.scrollY;
-    activeUntil = Date.now() + 3000;
+    bindStripGuard();
     runStabilization();
   }, true);
 
-  // Se o aplicativo recriar a faixa ou os chips depois do clique, recentraliza o item escolhido.
   const observer = new MutationObserver(() => {
+    bindStripGuard();
     if (selectedDept && Date.now() <= activeUntil) centerSelected();
   });
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
-  // Em resize/orientação, mantém a secretaria atual visível sem mexer no eixo vertical.
   window.addEventListener('resize', () => {
+    bindStripGuard();
     if (!selectedDept) return;
     const strip = getStrip();
     const chip = getChip(strip, selectedDept);
     if (!strip || !chip) return;
-
-    const max = Math.max(0, strip.scrollWidth - strip.clientWidth);
-    strip.scrollLeft = Math.max(0, Math.min(max, chip.offsetLeft - ((strip.clientWidth - chip.offsetWidth) / 2)));
+    strip.scrollLeft = getTargetLeft(strip, chip);
   });
+
+  window.addEventListener('pageshow', bindStripGuard);
+  bindStripGuard();
 })();
