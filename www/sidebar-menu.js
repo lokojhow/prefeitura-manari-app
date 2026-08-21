@@ -4,6 +4,7 @@
   const STRIP = '.secretaria-strip';
   const CHIP = '.secretaria-chip[data-dept]';
   const HIDE_CLASS = 'manari-hide-secretaria-bar';
+  const SHARE_URL = 'https://manari.pe.gov.br/';
   let drawer = null;
   let backdrop = null;
   let handle = null;
@@ -22,6 +23,8 @@
     .manari-sidebar-brand{padding:18px 20px 12px;border-bottom:1px solid #edf1ee}
     .manari-sidebar-brand strong{display:block;font-size:18px;color:#123b5b}
     .manari-sidebar-brand span{display:block;margin-top:3px;font-size:12px;color:#6c7a83}
+    .manari-sidebar-share{width:100%;margin-top:14px;border:0;border-radius:12px;background:#0b8748;color:#fff;padding:12px 14px;font:inherit;font-size:14px;font-weight:850;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 4px 12px rgba(11,135,72,.16)}
+    .manari-sidebar-share:active{transform:scale(.99)}
     .manari-sidebar-scroll{overflow:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 24px}
     .manari-sidebar-section{font-size:12px;font-weight:900;color:#0b7b45;text-transform:uppercase;letter-spacing:.04em;padding:10px 8px 8px}
     .manari-sidebar-item{width:100%;border:0;background:#fff;border-radius:13px;padding:12px 10px;display:flex;align-items:center;gap:11px;text-align:left;color:#14334d;font:inherit;font-size:14px;font-weight:750;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -92,6 +95,34 @@
     drawer?.querySelector('.manari-sidebar-close')?.focus({preventScroll:true});
   }
 
+  async function shareApp(){
+    const data={
+      title:'Prefeitura de Manari',
+      text:'Acesse o aplicativo oficial da Prefeitura Municipal de Manari.',
+      url:SHARE_URL
+    };
+    try{
+      if(navigator.share){
+        await navigator.share(data);
+        return;
+      }
+      if(navigator.clipboard?.writeText){
+        await navigator.clipboard.writeText(`${data.text} ${data.url}`);
+        alert('Link do aplicativo copiado. Agora é só colar e compartilhar.');
+        return;
+      }
+      window.prompt('Copie o link para compartilhar:',SHARE_URL);
+    }catch(error){
+      if(error?.name==='AbortError') return;
+      try{
+        await navigator.clipboard?.writeText(SHARE_URL);
+        alert('Link do aplicativo copiado.');
+      }catch(_){
+        window.prompt('Copie o link para compartilhar:',SHARE_URL);
+      }
+    }
+  }
+
   function navigateTo(dept){
     const candidates=Array.from(document.querySelectorAll(CHIP));
     const target=candidates.find(chip=>chip.dataset.dept===dept);
@@ -159,12 +190,14 @@
         <div class="manari-sidebar-brand">
           <strong>Secretarias e Áreas</strong>
           <span>Escolha uma área para acessar</span>
+          <button type="button" class="manari-sidebar-share" aria-label="Compartilhar aplicativo">↗ Compartilhar aplicativo</button>
         </div>
         <div class="manari-sidebar-scroll">
           <div class="manari-sidebar-section">Secretarias e áreas</div>
           <div class="manari-sidebar-items"></div>
         </div>`;
       drawer.querySelector('.manari-sidebar-close').addEventListener('click',close);
+      drawer.querySelector('.manari-sidebar-share').addEventListener('click',shareApp);
       document.body.appendChild(drawer);
     }
     renderItems();
