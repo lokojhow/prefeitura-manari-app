@@ -1,4 +1,4 @@
-const CACHE='manari-v1-3-6-sidebar-menu';
+const CACHE='manari-v1-3-7-share-app';
 const CORE=['./','index.html','styles.css','app.js','config.js','nav-fix.js','laws.js','sidebar-menu.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
 const SUPABASE_CDN='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
 
