@@ -5,7 +5,7 @@
   if (window.__MANARI_SOCIAL_BOOTSTRAP__) return;
   window.__MANARI_SOCIAL_BOOTSTRAP__ = true;
 
-  const VERSION = '2.0.1';
+  const VERSION = '2.0.2';
 
   function loadCss() {
     if (document.querySelector('link[data-manari-social-v2]')) return;
@@ -16,8 +16,20 @@
     document.head.appendChild(link);
   }
 
+  function loadFixes() {
+    if (document.querySelector('script[data-manari-social-fixes]')) return;
+    const fixes = document.createElement('script');
+    fixes.src = `social-fixes.js?v=${VERSION}`;
+    fixes.async = false;
+    fixes.setAttribute('data-manari-social-fixes', 'true');
+    document.body.appendChild(fixes);
+  }
+
   function loadScript() {
-    if (window.__MANARI_SOCIAL_SCRIPT_LOADING__ || document.getElementById('manariSocialApp')) return;
+    if (window.__MANARI_SOCIAL_SCRIPT_LOADING__ || document.getElementById('manariSocialApp')) {
+      loadFixes();
+      return;
+    }
     window.__MANARI_SOCIAL_SCRIPT_LOADING__ = true;
     const script = document.createElement('script');
     script.src = `social-layout.js?v=${VERSION}`;
@@ -25,6 +37,7 @@
     script.setAttribute('data-manari-social-v2', 'true');
     script.onload = () => {
       document.querySelectorAll('.manari-sidebar-handle,.manari-sidebar,.manari-sidebar-backdrop').forEach(el => el.remove());
+      loadFixes();
     };
     script.onerror = () => { window.__MANARI_SOCIAL_SCRIPT_LOADING__ = false; };
     document.body.appendChild(script);
