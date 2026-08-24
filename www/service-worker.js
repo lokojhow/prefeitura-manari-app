@@ -1,4 +1,4 @@
-const CACHE='manari-v2-0-2-functional-audit';
+const CACHE='manari-v2-0-3-stability-fix';
 const CORE=['./','index.html','styles.css','social-layout.css','app.js','config.js','laws.js','sidebar-menu.js','social-layout.js','social-fixes.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
 const SUPABASE_CDN='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
 
@@ -31,14 +31,14 @@ async function prepareResponse(request,response){
     if(type.includes('text/html')){
       let html=await response.text();
       if(!html.includes('social-layout.css')){
-        const style='<link rel="stylesheet" href="social-layout.css?v=2.0.2">';
+        const style='<link rel="stylesheet" href="social-layout.css?v=2.0.3">';
         html=html.includes('</head>')?html.replace('</head>',`${style}</head>`):`${style}${html}`;
       }
       const scripts=[];
       if(!html.includes('laws.js')) scripts.push('<script src="laws.js"></script>');
-      if(!html.includes('sidebar-menu.js')) scripts.push('<script src="sidebar-menu.js?v=2.0.2"></script>');
-      if(!html.includes('social-layout.js')) scripts.push('<script src="social-layout.js?v=2.0.2"></script>');
-      if(!html.includes('social-fixes.js')) scripts.push('<script src="social-fixes.js?v=2.0.2"></script>');
+      if(!html.includes('sidebar-menu.js')) scripts.push('<script src="sidebar-menu.js?v=2.0.3"></script>');
+      if(!html.includes('social-layout.js')) scripts.push('<script src="social-layout.js?v=2.0.3"></script>');
+      if(!html.includes('social-fixes.js')) scripts.push('<script src="social-fixes.js?v=2.0.3"></script>');
       if(scripts.length){
         const tags=scripts.join('');
         html=html.includes('</body>')?html.replace('</body>',`${tags}</body>`):`${html}${tags}`;
