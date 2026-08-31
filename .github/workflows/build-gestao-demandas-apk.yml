@@ -57,14 +57,12 @@ jobs:
           s = s.replace('https://packages.applied-caas-gateway1.internal.api.openai.org/artifactory/api/npm/npm-public/', 'https://registry.npmjs.org/')
           p.write_text(s, encoding='utf-8')
           PY
-          cat > gestao-build/capacitor.config.ts <<'EOF'
-          import type { CapacitorConfig } from '@capacitor/cli';
-          const config: CapacitorConfig = {
-            appId: 'br.gov.pe.manari.gestaodemandas',
-            appName: 'Manari Demandas',
-            webDir: 'www'
-          };
-          export default config;
+          cat > gestao-build/capacitor.config.json <<'EOF'
+          {
+            "appId": "br.gov.pe.manari.gestaodemandas",
+            "appName": "Manari Demandas",
+            "webDir": "www"
+          }
           EOF
 
       - name: Instalar dependências
