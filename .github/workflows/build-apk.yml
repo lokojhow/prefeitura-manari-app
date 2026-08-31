@@ -39,8 +39,17 @@ jobs:
         run: |
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+      - name: Preparar lockfile para o GitHub
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('package-lock.json')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('https://packages.applied-caas-gateway1.internal.api.openai.org/artifactory/api/npm/npm-public/', 'https://registry.npmjs.org/')
+          p.write_text(s, encoding='utf-8')
+          PY
       - name: Instalar dependências
-        run: npm ci --no-audit --no-fund
+        run: npm ci --no-audit --no-fund --registry=https://registry.npmjs.org/
       - name: Sincronizar Capacitor
         run: npx cap sync android
       - name: Gerar APK V1.0
