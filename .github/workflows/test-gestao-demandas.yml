@@ -1,0 +1,45 @@
+name: Testar Manari Gestão de Demandas
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "www/gestao-demandas/**"
+      - ".github/workflows/test-gestao-demandas.yml"
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Validar JavaScript
+        run: node --check www/gestao-demandas/app.js
+
+      - name: Validar manifesto e arquivos essenciais
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('www/gestao-demandas')
+          required = ['index.html','styles.css','app.js','manifest.webmanifest','service-worker.js']
+          missing = [name for name in required if not (root/name).exists()]
+          if missing:
+              raise SystemExit('Arquivos ausentes: ' + ', '.join(missing))
+          json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
+          html = (root/'index.html').read_text(encoding='utf-8')
+          for ref in ['styles.css','app.js','manifest.webmanifest']:
+              if ref not in html:
+                  raise SystemExit(f'Referência ausente no HTML: {ref}')
+          js = (root/'app.js').read_text(encoding='utf-8')
+          ids = ['demandForm','demandsList','generatorOutput','exportBtn','importInput']
+          for element_id in ids:
+              if f'id="{element_id}"' not in html:
+                  raise SystemExit(f'Elemento ausente: {element_id}')
+              if element_id not in js:
+                  raise SystemExit(f'Elemento não usado no JS: {element_id}')
+          print('Gestão de Demandas: validação concluída.')
+          PY
