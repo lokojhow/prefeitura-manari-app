@@ -1,66 +1,13 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#073a22" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Manari Demandas" />
-  <title>Manari Comunicação • Gestão de Demandas</title>
-  <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="../app-icon-192.png" />
-  <link rel="apple-touch-icon" href="../app-icon-192.png" />
-</head>
-<body>
-  <div class="app-shell">
-    <aside class="sidebar" id="sidebar">
-      <div class="brand"><img src="../app-icon-192.png" alt="Prefeitura Municipal de Manari" /><div><strong>Manari Comunicação</strong><span>Gestão de Demandas</span></div></div>
-      <nav>
-        <button class="nav-item active" data-view="dashboard">⌂ <span>Visão geral</span></button>
-        <button class="nav-item" data-view="demandas">▣ <span>Demandas</span></button>
-        <button class="nav-item" data-view="nova">＋ <span>Nova demanda</span></button>
-        <button class="nav-item" data-view="gerador">✦ <span>Gerador de conteúdo</span></button>
-        <button class="nav-item" data-view="equipes">♟ <span>Equipes</span></button>
-        <button class="nav-item" data-view="backup">⇩ <span>Backup</span></button>
-      </nav>
-      <div class="side-note">Funciona no Android, navegador e como aplicativo na Tela de Início do iPhone.</div>
-    </aside>
-
-    <main class="main">
-      <header class="topbar"><button class="menu-btn" id="menuBtn" aria-label="Abrir menu">☰</button><div><small>Prefeitura Municipal de Manari</small><h1 id="pageTitle">Visão geral</h1></div><button class="primary small" data-go="nova">+ Nova demanda</button></header>
-
-      <section class="view active" id="view-dashboard">
-        <div class="hero"><div><span class="eyebrow">Central da Comunicação</span><h2>Organize a semana em um só lugar.</h2><p>Receba ações das secretarias, distribua equipes, gere textos e acompanhe cada publicação.</p></div><div class="hero-badge"><span>Esta semana</span><strong id="weekCount">0</strong><small>demandas</small></div></div>
-        <div class="stats"><article><span>Recebidas</span><strong id="statRecebidas">0</strong></article><article><span>Em produção</span><strong id="statProducao">0</strong></article><article><span>Aguardando publicação</span><strong id="statAguardando">0</strong></article><article><span>Concluídas</span><strong id="statConcluidas">0</strong></article></div>
-        <div class="grid-2"><section class="panel"><div class="panel-head"><h3>Próximas ações</h3><button class="link" data-go="demandas">Ver todas</button></div><div id="upcomingList" class="list"></div></section><section class="panel"><div class="panel-head"><h3>Demandas sem equipe</h3><span class="tag danger" id="noTeamCount">0</span></div><div id="noTeamList" class="list"></div></section></div>
-      </section>
-
-      <section class="view" id="view-demandas"><div class="toolbar"><input id="searchInput" type="search" placeholder="Buscar por ação, secretaria ou local" /><select id="statusFilter"><option value="">Todos os status</option><option>Recebida</option><option>Agendada</option><option>Em cobertura</option><option>Em edição</option><option>Aguardando aprovação</option><option>Pronta para publicar</option><option>Publicada</option></select></div><div id="demandsList" class="cards"></div></section>
-
-      <section class="view" id="view-nova">
-        <form id="demandForm" class="panel form-panel"><div class="panel-head"><div><span class="eyebrow">Cadastro rápido</span><h3>Nova demanda</h3></div></div><div class="form-grid">
-          <label class="wide">Ação / pauta<input name="title" required placeholder="Ex.: Entrega de novos equipamentos" /></label>
-          <label>Secretaria<select name="secretariat" required><option value="">Selecione</option><option>Prefeitura</option><option>Administração</option><option>Educação e Cultura</option><option>Assistência Social</option><option>Finanças</option><option>Saúde</option><option>Infraestrutura</option><option>Agricultura</option><option>Esportes</option><option>Outra</option></select></label>
-          <label>Prioridade<select name="priority"><option>Normal</option><option>Alta</option><option>Urgente</option><option>Baixa</option></select></label>
-          <label>Data<input name="date" type="date" /></label><label>Horário<input name="time" type="time" /></label>
-          <label class="wide">Local<input name="location" placeholder="Local da ação" /></label>
-          <label class="wide">Informações recebidas<textarea name="details" rows="4" placeholder="Cole aqui a mensagem da secretaria ou descreva a ação..."></textarea></label>
-          <label>Tipo de cobertura<select name="coverage"><option>Cobertura completa</option><option>Fotos</option><option>Vídeo / Reels</option><option>Stories</option><option>Matéria para portal</option><option>Arte</option></select></label>
-          <label>Equipe / responsável<input name="team" placeholder="Nome ou equipe" /></label>
-        </div><div class="actions"><button type="reset" class="ghost">Limpar</button><button type="submit" class="primary">Salvar demanda</button></div></form>
-      </section>
-
-      <section class="view" id="view-gerador"><div class="grid-2 generator-layout"><form id="generatorForm" class="panel form-panel"><div class="panel-head"><div><span class="eyebrow">Gerador gratuito</span><h3>Gerar conteúdo</h3></div></div><label>Usar uma demanda<select id="generatorDemand"><option value="">Preencher manualmente</option></select></label><label>Tema / ação<input id="genTitle" placeholder="Ex.: recuperação de estrada rural" /></label><label>Secretaria<input id="genSecretariat" placeholder="Secretaria responsável" /></label><label>Local<input id="genLocation" placeholder="Local da ação" /></label><label>Informações importantes<textarea id="genDetails" rows="5" placeholder="O que aconteceu, quem participou, objetivo, resultados..."></textarea></label><div class="actions wrap"><button type="button" class="primary" data-generate="all">Gerar tudo</button><button type="button" class="ghost" data-generate="caption">Legenda</button><button type="button" class="ghost" data-generate="portal">Portal</button><button type="button" class="ghost" data-generate="reels">Reels</button></div></form><section class="panel output-panel"><div class="panel-head"><h3>Conteúdo gerado</h3><button class="link" id="copyAll">Copiar tudo</button></div><div id="generatorOutput" class="output"><p class="empty">Preencha as informações e toque em “Gerar tudo”.</p></div></section></div></section>
-
-      <section class="view" id="view-equipes"><div class="panel"><div class="panel-head"><div><span class="eyebrow">Organização</span><h3>Equipes e responsáveis</h3></div><button class="primary small" id="addTeamBtn">+ Adicionar</button></div><div id="teamsList" class="team-grid"></div></div></section>
-
-      <section class="view" id="view-backup"><div class="grid-2"><section class="panel"><span class="eyebrow">Segurança</span><h3>Exportar backup</h3><p>Baixe um arquivo com demandas, equipes e datas importantes cadastradas neste aparelho.</p><button class="primary" id="exportBtn">Baixar backup JSON</button></section><section class="panel"><span class="eyebrow">Restauração</span><h3>Importar backup</h3><p>Restaure dados de outro aparelho ou de um arquivo salvo em Drive, OneDrive ou HD.</p><label class="file-label">Selecionar arquivo<input type="file" id="importInput" accept="application/json" /></label></section></div></section>
-    </main>
-  </div>
-  <div class="toast" id="toast"></div>
-  <script src="app.js"></script>
-  <script src="calendar-addon.js"></script>
-</body>
-</html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#063b25"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Manari Demandas"><title>Manari Comunicação • Gestão de Demandas</title><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css"><link rel="icon" href="../app-icon-192.png"><link rel="apple-touch-icon" href="../app-icon-192.png"></head><body>
+<div class="app-shell"><aside class="sidebar" id="sidebar"><div class="brand"><img src="../app-icon-192.png" alt="Manari"><div><strong>MANARI</strong><span>Comunicação</span></div></div><nav><button class="nav-item active" data-view="dashboard">⌂ <span>Dashboard</span></button><button class="nav-item" data-view="demandas">▣ <span>Demandas</span></button><button class="nav-item" data-view="calendario">□ <span>Calendário Institucional</span></button><button class="nav-item" data-view="secretarias">♜ <span>Secretarias</span></button><button class="nav-item" data-view="equipes">♙ <span>Equipe</span></button><button class="nav-item" data-view="gerador">✦ <span>Gerador de conteúdo</span></button><button class="nav-item" data-view="backup">⇩ <span>Backup</span></button></nav><div class="profile-mini"><div class="avatar">JS</div><div><strong>Administrador</strong><span>Gestão da comunicação</span></div></div></aside>
+<main class="main"><header class="topbar"><button class="menu-btn" id="menuBtn">☰</button><div class="mobile-brand"><img src="../app-icon-192.png"><strong>MANARI</strong></div><div class="searchbox">⌕ <input id="globalSearch" placeholder="Buscar demandas, pessoas, secretarias..."></div><button class="notify">♧<b>3</b></button><div class="avatar top-avatar">JS</div></header>
+<section class="view active" id="view-dashboard"><div class="page-head"><div><h1>Dashboard</h1><p>Visão geral das demandas e atividades da comunicação</p></div><div class="head-actions"><button class="ghost" data-go="calendario">□ Calendário</button><button class="primary" data-go="nova">＋ Nova Demanda</button></div></div><div class="stats modern"><article><i class="stat-icon green">▧</i><div><strong id="weekCount">0</strong><span>Demandas esta semana</span><small>↑ acompanhamento semanal</small></div></article><article><i class="stat-icon amber">▤</i><div><strong id="statProducao">0</strong><span>Em andamento</span><small>Produção ativa</small></div></article><article><i class="stat-icon blue">✓</i><div><strong id="statConcluidas">0</strong><span>Concluídas</span><small>Publicações finalizadas</small></div></article><article><i class="stat-icon purple">◫</i><div><strong id="statAguardando">0</strong><span>Aguardando aprovação</span><small>Precisam de atenção</small></div></article></div><section class="panel table-panel"><div class="panel-head"><h3>Demandas da Semana</h3><button class="link" data-go="demandas">Ver todas</button></div><div id="upcomingList" class="demand-table"></div></section></section>
+<section class="view" id="view-demandas"><div class="page-head"><div><h1>Demandas</h1><p>Acompanhe todas as pautas e produções</p></div><button class="primary" data-go="nova">＋ Nova Demanda</button></div><div class="toolbar"><input id="searchInput" type="search" placeholder="Buscar demanda"><select id="statusFilter"><option value="">Todos os status</option><option>Recebida</option><option>Agendada</option><option>Em cobertura</option><option>Em edição</option><option>Aguardando aprovação</option><option>Pronta para publicar</option><option>Publicada</option></select></div><div id="demandsList" class="cards"></div></section>
+<section class="view" id="view-nova"><div class="page-head"><div><h1>Nova demanda</h1><p>Cadastre uma nova pauta para a equipe</p></div></div><form id="demandForm" class="panel form-panel"><div class="form-grid"><label class="wide">Ação / pauta<input name="title" required></label><label>Secretaria<select name="secretariat" id="demandSecretariat" required></select></label><label>Prioridade<select name="priority"><option>Normal</option><option>Alta</option><option>Urgente</option><option>Baixa</option></select></label><label>Data<input name="date" type="date"></label><label>Horário<input name="time" type="time"></label><label class="wide">Local<input name="location"></label><label class="wide">Informações recebidas<textarea name="details" rows="4"></textarea></label><label>Tipo de cobertura<select name="coverage"><option>Cobertura completa</option><option>Fotos</option><option>Vídeo / Reels</option><option>Stories</option><option>Matéria para portal</option><option>Arte</option></select></label><label>Equipe / responsável<input name="team"></label></div><div class="actions"><button type="reset" class="ghost">Limpar</button><button class="primary">Salvar demanda</button></div></form></section>
+<section class="view" id="view-calendario"></section>
+<section class="view" id="view-secretarias"><div class="page-head"><div><h1>Secretarias</h1><p>Espaço individual para organizar as demandas de cada área</p></div><button class="primary" id="addSecretariatBtn">＋ Nova Secretaria</button></div><div id="secretariatsGrid" class="secretariat-grid"></div></section>
+<section class="view" id="view-gerador"><div class="page-head"><div><h1>Gerador de conteúdo</h1><p>Crie textos a partir das informações da demanda</p></div></div><div class="grid-2"><form id="generatorForm" class="panel form-panel"><label>Usar uma demanda<select id="generatorDemand"><option value="">Preencher manualmente</option></select></label><label>Tema / ação<input id="genTitle"></label><label>Secretaria<input id="genSecretariat"></label><label>Local<input id="genLocation"></label><label>Informações importantes<textarea id="genDetails" rows="5"></textarea></label><div class="actions wrap"><button type="button" class="primary" data-generate="all">Gerar tudo</button><button type="button" class="ghost" data-generate="caption">Legenda</button><button type="button" class="ghost" data-generate="portal">Portal</button><button type="button" class="ghost" data-generate="reels">Reels</button></div></form><section class="panel"><div class="panel-head"><h3>Conteúdo gerado</h3><button class="link" id="copyAll">Copiar tudo</button></div><div id="generatorOutput" class="output"><p class="empty">Preencha as informações e toque em “Gerar tudo”.</p></div></section></div></section>
+<section class="view" id="view-equipes"><div class="page-head"><div><h1>Equipe</h1><p>Responsáveis pela produção e cobertura</p></div><button class="primary" id="addTeamBtn">＋ Adicionar</button></div><div id="teamsList" class="team-grid"></div></section>
+<section class="view" id="view-backup"><div class="page-head"><div><h1>Backup</h1><p>Proteja e restaure os dados do aplicativo</p></div></div><div class="grid-2"><section class="panel"><h3>Exportar backup</h3><p>Demandas, equipe, secretarias e datas importantes.</p><button class="primary" id="exportBtn">Baixar backup JSON</button></section><section class="panel"><h3>Importar backup</h3><label class="file-label">Selecionar arquivo<input type="file" id="importInput" accept="application/json"></label></section></div></section>
+</main></div><div class="mobile-nav"><button data-go="dashboard">⌂<span>Início</span></button><button data-go="demandas">▣<span>Demandas</span></button><button data-go="calendario">□<span>Calendário</span></button><button data-go="secretarias">♜<span>Secretarias</span></button><button data-go="equipes">♙<span>Equipe</span></button></div><div class="toast" id="toast"></div><script src="app.js"></script><script src="calendar-addon.js"></script></body></html>
