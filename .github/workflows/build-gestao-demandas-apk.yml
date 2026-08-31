@@ -24,6 +24,7 @@ jobs:
         with:
           node-version: "22"
           cache: npm
+          registry-url: "https://registry.npmjs.org"
 
       - name: Preparar Java
         uses: actions/setup-java@v5
@@ -49,6 +50,13 @@ jobs:
           cp www/app-icon-192.png gestao-build/www/app-icon-192.png
           cp www/app-icon-512.png gestao-build/www/app-icon-512.png
           sed -i 's#../app-icon-192.png#app-icon-192.png#g; s#../app-icon-512.png#app-icon-512.png#g' gestao-build/www/index.html gestao-build/www/manifest.webmanifest gestao-build/www/service-worker.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('gestao-build/package-lock.json')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('https://packages.applied-caas-gateway1.internal.api.openai.org/artifactory/api/npm/npm-public/', 'https://registry.npmjs.org/')
+          p.write_text(s, encoding='utf-8')
+          PY
           cat > gestao-build/capacitor.config.ts <<'EOF'
           import type { CapacitorConfig } from '@capacitor/cli';
           const config: CapacitorConfig = {
@@ -61,7 +69,7 @@ jobs:
 
       - name: Instalar dependências
         working-directory: gestao-build
-        run: npm ci --no-audit --no-fund
+        run: npm ci --no-audit --no-fund --registry=https://registry.npmjs.org/
 
       - name: Criar projeto Android
         working-directory: gestao-build
