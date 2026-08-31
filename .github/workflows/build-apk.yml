@@ -8,12 +8,11 @@ on:
     paths:
       - "android/**"
       - "www/**"
+      - "!www/gestao-demandas/**"
       - "package.json"
       - "package-lock.json"
       - "capacitor.config.ts"
       - ".github/workflows/build-apk.yml"
-    paths-ignore:
-      - "www/gestao-demandas/**"
 
 jobs:
   build-apk:
