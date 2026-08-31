@@ -1,0 +1,86 @@
+name: Gerar APK Manari Gestão de Demandas
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "www/gestao-demandas/**"
+      - ".github/workflows/build-gestao-demandas-apk.yml"
+      - "package.json"
+      - "package-lock.json"
+
+jobs:
+  build-gestao-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Preparar Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Preparar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar Android 36
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Preparar projeto isolado
+        run: |
+          rm -rf gestao-build
+          mkdir -p gestao-build/www
+          cp package.json package-lock.json gestao-build/
+          cp -R www/gestao-demandas/. gestao-build/www/
+          cp www/app-icon-192.png gestao-build/www/app-icon-192.png
+          cp www/app-icon-512.png gestao-build/www/app-icon-512.png
+          sed -i 's#../app-icon-192.png#app-icon-192.png#g; s#../app-icon-512.png#app-icon-512.png#g' gestao-build/www/index.html gestao-build/www/manifest.webmanifest gestao-build/www/service-worker.js
+          cat > gestao-build/capacitor.config.ts <<'EOF'
+          import type { CapacitorConfig } from '@capacitor/cli';
+          const config: CapacitorConfig = {
+            appId: 'br.gov.pe.manari.gestaodemandas',
+            appName: 'Manari Demandas',
+            webDir: 'www'
+          };
+          export default config;
+          EOF
+
+      - name: Instalar dependências
+        working-directory: gestao-build
+        run: npm ci --no-audit --no-fund
+
+      - name: Criar projeto Android
+        working-directory: gestao-build
+        run: npx cap add android
+
+      - name: Sincronizar conteúdo
+        working-directory: gestao-build
+        run: npx cap sync android
+
+      - name: Gerar APK
+        working-directory: gestao-build/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Disponibilizar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Manari-Gestao-Demandas-APK
+          path: gestao-build/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
