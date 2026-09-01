@@ -1,0 +1,1 @@
+window.MANARI_DEMANDAS_CONFIG={supabaseUrl:'https://dxvqiiawthxwkypvsxci.supabase.co',supabaseAnonKey:'sb_publishable_Zno2VuYH9oev89OpttorUA_wzNb0EP6'};
