@@ -17,7 +17,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validar JavaScript
-        run: node --check www/gestao-demandas/app.js
+        run: |
+          node --check www/gestao-demandas/app.js
+          node --check www/gestao-demandas/calendar-addon.js
+          node --check www/gestao-demandas/config.js
 
       - name: Validar manifesto e arquivos essenciais
         run: |
@@ -25,21 +28,23 @@ jobs:
           import json
           from pathlib import Path
           root = Path('www/gestao-demandas')
-          required = ['index.html','styles.css','app.js','manifest.webmanifest','service-worker.js']
+          required = ['index.html','styles.css','app.js','config.js','calendar-addon.js','manifest.webmanifest','service-worker.js']
           missing = [name for name in required if not (root/name).exists()]
           if missing:
               raise SystemExit('Arquivos ausentes: ' + ', '.join(missing))
           json.loads((root/'manifest.webmanifest').read_text(encoding='utf-8'))
           html = (root/'index.html').read_text(encoding='utf-8')
-          for ref in ['styles.css','app.js','manifest.webmanifest']:
+          for ref in ['styles.css','app.js','config.js','calendar-addon.js','manifest.webmanifest']:
               if ref not in html:
                   raise SystemExit(f'Referência ausente no HTML: {ref}')
           js = (root/'app.js').read_text(encoding='utf-8')
-          ids = ['demandForm','demandsList','generatorOutput','exportBtn','importInput']
+          ids = ['loginForm','appShell','demandForm','demandsList','myDemandsList','inviteTeamForm','analyticsForm','analyticsList','generatorOutput','exportBtn']
           for element_id in ids:
               if f'id="{element_id}"' not in html:
                   raise SystemExit(f'Elemento ausente: {element_id}')
               if element_id not in js:
                   raise SystemExit(f'Elemento não usado no JS: {element_id}')
+          if html.count('id="view-calendario"') != 1:
+              raise SystemExit('Calendário duplicado ou ausente')
           print('Gestão de Demandas: validação concluída.')
           PY
