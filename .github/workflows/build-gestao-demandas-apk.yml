@@ -50,6 +50,13 @@ jobs:
           cp www/app-icon-192.png gestao-build/www/app-icon-192.png
           cp www/app-icon-512.png gestao-build/www/app-icon-512.png
           sed -i 's#../app-icon-192.png#app-icon-192.png#g; s#../app-icon-512.png#app-icon-512.png#g' gestao-build/www/index.html gestao-build/www/manifest.webmanifest gestao-build/www/service-worker.js
+          cat >> gestao-build/www/styles.css <<'EOF'
+          @media (max-width:600px){
+            .sidebar{display:flex;left:-260px;width:240px;z-index:90;box-shadow:10px 0 30px rgba(0,0,0,.18)}
+            .sidebar.open{display:flex;left:0}
+            .menu-btn{position:relative;z-index:95;cursor:pointer;touch-action:manipulation}
+          }
+          EOF
           python3 - <<'PY'
           from pathlib import Path
           p = Path('gestao-build/package-lock.json')
