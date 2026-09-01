@@ -1,0 +1,5 @@
+@media (max-width:600px){
+  .sidebar{display:flex;left:-260px;width:240px;z-index:90;box-shadow:10px 0 30px rgba(0,0,0,.18)}
+  .sidebar.open{display:flex;left:0}
+  .menu-btn{position:relative;z-index:95;cursor:pointer;touch-action:manipulation}
+}
