@@ -1,9 +1,9 @@
-// Prefeitura de Manari — ponte de atualização para o layout Social V3
+// Prefeitura de Manari — ponte de atualização para o layout Social V3.2
 (() => {
   if (window.__MANARI_SOCIAL_BOOTSTRAP__) return;
   window.__MANARI_SOCIAL_BOOTSTRAP__ = true;
 
-  const VERSION = '3.0';
+  const VERSION = '3.2';
 
   function addCss(attr, href) {
     if (document.querySelector(`link[${attr}]`)) return;
@@ -41,7 +41,7 @@
   }
 
   function loadFixes() {
-    const done = () => loadPortalInternal(loadTransparency);
+    const done = () => loadTransparency();
     if (!document.querySelector('script[data-manari-social-fixes]')) {
       const fixes = document.createElement('script');
       fixes.src = `social-fixes.js?v=${VERSION}`;
@@ -54,7 +54,7 @@
     done();
   }
 
-  function loadScript() {
+  function loadSocial() {
     if (window.__MANARI_SOCIAL_SCRIPT_LOADING__ || document.getElementById('manariSocialApp')) {
       loadFixes();
       return;
@@ -72,7 +72,11 @@
     document.body.appendChild(script);
   }
 
-  function boot() { loadCss(); loadScript(); }
+  function boot() {
+    loadCss();
+    loadPortalInternal(loadSocial);
+  }
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
 })();
