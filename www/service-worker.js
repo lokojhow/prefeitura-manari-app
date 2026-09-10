@@ -1,8 +1,42 @@
-const CACHE='manari-v4-4-admin-click';
-const VERSION='4.4';
-const CORE=['./','index.html','styles.css','social-layout.css','responsive-overrides.css','transparency-center.css','portal-internal.css','portal-auth.css','portal-cms.css','app.js','config.js','laws.js','sidebar-menu.js','social-layout.js','social-fixes.js','transparency-center.js','portal-internal.js','portal-auth.js','portal-cms.js','portal-cms-bridge.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
+const CACHE='manari-v5-classico';
+const VERSION='5.0';
+const CORE=['./','index.html','styles.css','app.js','config.js','laws.js','sidebar-menu.js','portal-internal.css','portal-auth.css','portal-cms.css','transparency-center.css','portal-internal.js','portal-auth.js','portal-cms.js','portal-cms-bridge.js','transparency-center.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
 const SUPABASE_CDN='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-async function prepareResponse(request,response){if(!response||!response.ok)return response;const url=new URL(request.url);if(url.pathname.endsWith('/config.js')){const original=await response.text();const loader=`if(!window.supabase){document.write('<script src="${SUPABASE_CDN}"><\\/script>');}\n`;return new Response(loader+original,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'application/javascript; charset=utf-8','Cache-Control':'no-cache, no-store'}});}if(request.mode==='navigate'){const type=response.headers.get('content-type')||'';if(type.includes('text/html')){let html=await response.text();const bootStyle='<style id="manari-preboot">body> *:not(script):not(style):not(link){visibility:hidden!important}#manariSocialApp{visibility:visible!important}</style>';if(!html.includes('id="manari-preboot"'))html=html.includes('</head>')?html.replace('</head>',bootStyle+'</head>'):bootStyle+html;const head=[];for(const f of ['social-layout.css','responsive-overrides.css','transparency-center.css','portal-internal.css','portal-auth.css','portal-cms.css'])if(!html.includes(f))head.push(`<link rel="stylesheet" href="${f}?v=${VERSION}">`);if(head.length)html=html.replace('</head>',head.join('')+'</head>');const scripts=[];if(!html.includes('laws.js'))scripts.push('<script src="laws.js"></script>');if(!html.includes('sidebar-menu.js'))scripts.push(`<script src="sidebar-menu.js?v=${VERSION}"></script>`);if(scripts.length)html=html.includes('</body>')?html.replace('</body>',scripts.join('')+'</body>'):html+scripts.join('');const headers=new Headers(response.headers);headers.set('Content-Type','text/html; charset=utf-8');headers.delete('Content-Length');headers.set('Cache-Control','no-cache, no-store, must-revalidate');return new Response(html,{status:response.status,statusText:response.statusText,headers});}}return response;}
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const url=new URL(e.request.url);if(url.origin!==self.location.origin)return;if(e.request.mode==='navigate'){e.respondWith(fetch(e.request,{cache:'no-store'}).then(async r=>{const p=await prepareResponse(e.request,r);if(p?.ok)caches.open(CACHE).then(c=>c.put('index.html',p.clone()));return p;}).catch(async()=>prepareResponse(e.request,await caches.match('index.html'))));return;}e.respondWith(fetch(e.request,{cache:'no-store'}).then(async r=>{const p=await prepareResponse(e.request,r);if(p?.ok)caches.open(CACHE).then(c=>c.put(e.request,p.clone()));return p;}).catch(()=>caches.match(e.request)));});
+async function prepareResponse(request,response){
+  if(!response||!response.ok)return response;
+  const url=new URL(request.url);
+  if(url.pathname.endsWith('/config.js')){
+    const original=await response.text();
+    const loader=`if(!window.supabase){document.write('<script src="${SUPABASE_CDN}"><\\/script>');}\n`;
+    return new Response(loader+original,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'application/javascript; charset=utf-8','Cache-Control':'no-cache, no-store'}});
+  }
+  if(request.mode==='navigate'){
+    const type=response.headers.get('content-type')||'';
+    if(type.includes('text/html')){
+      let html=await response.text();
+      // Remove qualquer injeção antiga do layout social e mantém o HTML clássico como interface principal.
+      html=html.replace(/<style id="manari-preboot">[\s\S]*?<\/style>/g,'');
+      const head=[];
+      for(const f of ['portal-internal.css','portal-auth.css','portal-cms.css','transparency-center.css']) if(!html.includes(f)) head.push(`<link rel="stylesheet" href="${f}?v=${VERSION}">`);
+      if(head.length) html=html.includes('</head>')?html.replace('</head>',head.join('')+'</head>'):head.join('')+html;
+      const scripts=[];
+      if(!html.includes('laws.js')) scripts.push('<script src="laws.js"></script>');
+      if(!html.includes('sidebar-menu.js')) scripts.push(`<script src="sidebar-menu.js?v=${VERSION}"></script>`);
+      if(scripts.length) html=html.includes('</body>')?html.replace('</body>',scripts.join('')+'</body>'):html+scripts.join('');
+      const headers=new Headers(response.headers);headers.set('Content-Type','text/html; charset=utf-8');headers.delete('Content-Length');headers.set('Cache-Control','no-cache, no-store, must-revalidate');
+      return new Response(html,{status:response.status,statusText:response.statusText,headers});
+    }
+  }
+  return response;
+}
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  const url=new URL(e.request.url);if(url.origin!==self.location.origin)return;
+  if(e.request.mode==='navigate'){
+    e.respondWith(fetch(e.request,{cache:'no-store'}).then(async r=>{const p=await prepareResponse(e.request,r);if(p?.ok)caches.open(CACHE).then(c=>c.put('index.html',p.clone()));return p;}).catch(async()=>prepareResponse(e.request,await caches.match('index.html'))));
+    return;
+  }
+  e.respondWith(fetch(e.request,{cache:'no-store'}).then(async r=>{const p=await prepareResponse(e.request,r);if(p?.ok)caches.open(CACHE).then(c=>c.put(e.request,p.clone()));return p;}).catch(()=>caches.match(e.request)));
+});
