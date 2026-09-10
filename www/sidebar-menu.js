@@ -1,9 +1,9 @@
-// Prefeitura de Manari — ponte de atualização para o layout Social V3.3
+// Prefeitura de Manari — ponte de atualização para o layout Social V4
 (() => {
   if (window.__MANARI_SOCIAL_BOOTSTRAP__) return;
   window.__MANARI_SOCIAL_BOOTSTRAP__ = true;
 
-  const VERSION = '3.3';
+  const VERSION = '4.0';
 
   function addCss(attr, href) {
     if (document.querySelector(`link[${attr}]`)) return;
@@ -20,6 +20,7 @@
     addCss('data-manari-transparency', 'transparency-center.css');
     addCss('data-manari-portal-internal', 'portal-internal.css');
     addCss('data-manari-portal-auth', 'portal-auth.css');
+    addCss('data-manari-portal-cms', 'portal-cms.css');
   }
 
   function loadScriptOnce(attr, src, ready, next) {
@@ -32,6 +33,11 @@
     document.body.appendChild(script);
   }
 
+  function loadCMS(next) {
+    loadScriptOnce('data-manari-portal-cms','portal-cms.js',()=>window.ManariSectorCMS,() =>
+      loadScriptOnce('data-manari-portal-cms-bridge','portal-cms-bridge.js',()=>window.__MANARI_CMS_BRIDGE__,next)
+    );
+  }
   function loadPortalAuth(next) {
     loadScriptOnce('data-manari-portal-auth','portal-auth.js',()=>window.ManariPortalAuth,next);
   }
@@ -76,7 +82,7 @@
 
   function boot() {
     loadCss();
-    loadPortalInternal(() => loadPortalAuth(loadSocial));
+    loadPortalInternal(() => loadPortalAuth(() => loadCMS(loadSocial)));
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
