@@ -1,4 +1,4 @@
-// Prefeitura de Manari — serviços, documentos e alimentação setorial V3.1
+// Prefeitura de Manari — serviços, documentos e alimentação setorial V3.2
 (() => {
   if (window.ManariPortalInternal) return;
   const CFG = window.MANARI_CONFIG || {};
@@ -42,9 +42,34 @@
   async function renderRows(){
     const body=document.querySelector('.mpi-body');if(!body||!active)return;const q=norm(document.querySelector('.mpi-search input')?.value);
     if(active.module==='contracheque')return renderPayslips(q);
+    if(active.module==='ouvidoria'||active.module==='esic')return renderCitizenRequest(active.module);
     const docs=active.docs||[];const rows=docs.filter(d=>!q||norm([d.title,d.description,d.reference_number,d.year,d.department,d.category].join(' ')).includes(q));
     body.innerHTML=`${staffBar()}${rows.length?`<div class="mpi-count">${rows.length} ${rows.length===1?'publicação encontrada':'publicações encontradas'}</div><div class="mpi-list">${rows.map(documentCard).join('')}</div>`:'<div class="mpi-empty"><strong>Nenhum documento publicado ainda.</strong><span>O módulo já está pronto. O setor responsável pode publicar diretamente por esta área quando estiver autorizado.</span></div>'}`;bindStaffButton();
   }
+
+  async function renderCitizenRequest(type){
+    const body=document.querySelector('.mpi-body');if(!body)return;
+    const isOuvidoria=type==='ouvidoria';
+    const session=await getSession();
+    body.innerHTML=`<form class="mpi-form mpi-citizen-form"><h2>${isOuvidoria?'Registrar manifestação':'Solicitar informação'}</h2><p class="mpi-form-help">${isOuvidoria?'Envie elogio, sugestão, reclamação, denúncia ou solicitação diretamente à Prefeitura.':'Faça seu pedido de acesso à informação diretamente pelo aplicativo.'}</p>${isOuvidoria?'<label class="mpi-check"><input type="checkbox" name="anonymous"> Enviar de forma anônima</label>':''}<div class="mpi-identification"><label>Nome<input name="requester_name" autocomplete="name" ${isOuvidoria?'':'required'}></label><label>E-mail<input type="email" name="requester_email" autocomplete="email" ${isOuvidoria?'':'required'}></label><label>Telefone<input name="requester_phone" autocomplete="tel"></label></div><label>Assunto<input name="subject" required maxlength="180"></label><label>Mensagem<textarea name="message" required minlength="10"></textarea></label><div class="mpi-actions"><button class="mpi-open" type="submit">Enviar para a Prefeitura</button></div><div class="mpi-form-status"></div>${session?'<p class="mpi-form-help">Seu protocolo ficará vinculado à sua conta para consulta futura.</p>':''}</form>`;
+    const form=body.querySelector('.mpi-citizen-form');
+    const anon=form.querySelector('[name="anonymous"]');
+    anon?.addEventListener('change',()=>{form.querySelector('.mpi-identification').style.display=anon.checked?'none':'grid';});
+    form.addEventListener('submit',submitCitizenRequest);
+  }
+
+  async function submitCitizenRequest(e){
+    e.preventDefault();
+    const form=e.currentTarget,status=form.querySelector('.mpi-form-status'),c=await getClient();if(!c)return;
+    const fd=new FormData(form), anonymous=fd.get('anonymous')==='on', session=await getSession();
+    const payload={request_type:active.module,subject:String(fd.get('subject')||'').trim(),message:String(fd.get('message')||'').trim(),anonymous,requester_name:anonymous?null:String(fd.get('requester_name')||'').trim()||null,requester_email:anonymous?null:String(fd.get('requester_email')||'').trim()||null,requester_phone:anonymous?null:String(fd.get('requester_phone')||'').trim()||null,user_id:session?.user?.id||null};
+    status.textContent='Enviando...';
+    const {data,error}=await c.from('citizen_requests').insert(payload).select('protocol').single();
+    if(error){status.textContent='Não foi possível enviar agora. Verifique os campos e tente novamente.';return}
+    form.innerHTML=`<div class="mpi-empty"><strong>Solicitação enviada com sucesso.</strong><span>Protocolo: ${esc(data.protocol)}</span><span>Guarde este número para acompanhamento.</span><button class="mpi-open mpi-new-request" type="button">Fazer outra solicitação</button></div>`;
+    form.querySelector('.mpi-new-request')?.addEventListener('click',()=>renderCitizenRequest(active.module));
+  }
+
   function showDocumentForm(){
     const body=document.querySelector('.mpi-body');if(!body||!canManage(active.module))return;
     body.innerHTML=`<form class="mpi-form"><h2>Publicar em ${esc(active.title)}</h2><label>Título<input name="title" required></label><label>Descrição<textarea name="description"></textarea></label><div class="mpi-form-grid"><label>Número / referência<input name="reference_number"></label><label>Data<input type="date" name="reference_date"></label><label>Ano<input type="number" name="year" min="1900" max="2100"></label><label>Setor<input name="department" value="${esc(staff.department||'')}"></label></div><label>Arquivo oficial<input type="file" name="file" accept="application/pdf,image/jpeg,image/png,image/webp" required></label><div class="mpi-actions"><button class="mpi-open" type="submit">Publicar</button><button class="mpi-cancel" type="button">Cancelar</button></div><div class="mpi-form-status"></div></form>`;
@@ -83,7 +108,7 @@
     const competence=comp+'-01';const ins=await c.from('employee_payslips').upsert({user_id:profile.user_id,competence,file_url:path,description:String(fd.get('description')||'').trim()||`Contracheque ${comp}`},{onConflict:'user_id,competence'});if(ins.error){status.textContent='Falha ao registrar contracheque: '+ins.error.message;return}status.textContent=`Publicado para ${profile.full_name||reg}.`;setTimeout(()=>renderPayslips(),700);
   }
 
-  async function open(title,moduleOverride){ensure();const module=moduleOverride||moduleFor(title);active={title,module,docs:[]};staff=null;document.querySelector('.mpi-overlay')?.classList.add('open');document.body.style.overflow='hidden';document.querySelector('.mpi-head h1').textContent=title;document.querySelector('.mpi-head p').textContent=module==='contracheque'?'Acesso pessoal e protegido do servidor.':'Consulta oficial dentro do aplicativo da Prefeitura de Manari.';const body=document.querySelector('.mpi-body');if(body)body.innerHTML='<div class="mpi-loading">Carregando…</div>';await getStaff();if(module==='contracheque'){await renderPayslips();return}active.docs=await loadDocs(module);renderRows()}
+  async function open(title,moduleOverride){ensure();const module=moduleOverride||moduleFor(title);active={title,module,docs:[]};staff=null;document.querySelector('.mpi-overlay')?.classList.add('open');document.body.style.overflow='hidden';document.querySelector('.mpi-head h1').textContent=title;document.querySelector('.mpi-head p').textContent=module==='contracheque'?'Acesso pessoal e protegido do servidor.':(module==='ouvidoria'||module==='esic'?'Atendimento direto dentro do aplicativo da Prefeitura de Manari.':'Consulta oficial dentro do aplicativo da Prefeitura de Manari.');const body=document.querySelector('.mpi-body');if(body)body.innerHTML='<div class="mpi-loading">Carregando…</div>';await getStaff();if(module==='contracheque'){await renderPayslips();return}if(module==='ouvidoria'||module==='esic'){renderCitizenRequest(module);return}active.docs=await loadDocs(module);renderRows()}
   function close(){document.querySelector('.mpi-overlay')?.classList.remove('open');document.body.style.overflow='';active=null}
   function intercept(){document.addEventListener('click',e=>{const service=e.target.closest('[data-service-url],.sm-quick-card[data-url]');if(service){const title=service.querySelector('b')?.textContent?.trim()||service.textContent.trim();if(title){e.preventDefault();e.stopImmediatePropagation();open(title);return}}const nav=e.target.closest('#manariSocialApp [data-nav]');if(!nav)return;const map={diario:['Diário Oficial','diario_oficial'],ouvidoria:['Ouvidoria','ouvidoria'],esic:['e-SIC / Pedido de Informação','esic'],programas:['Carta de Serviços','carta_servicos']};const m=map[nav.dataset.nav];if(m){e.preventDefault();e.stopImmediatePropagation();open(m[0],m[1])}},true)}
   window.ManariPortalInternal={open,close,moduleFor};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',intercept,{once:true});else intercept();
