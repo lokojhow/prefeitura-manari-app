@@ -1,27 +1,34 @@
-// Prefeitura de Manari — ponte de atualização para o layout Social V2
-// Este arquivo já existe nas versões antigas do app; por isso ele força o carregamento
-// da nova interface mesmo quando o HTML antigo ainda está em cache.
+// Prefeitura de Manari — ponte de atualização para o layout Social V3
 (() => {
   if (window.__MANARI_SOCIAL_BOOTSTRAP__) return;
   window.__MANARI_SOCIAL_BOOTSTRAP__ = true;
 
-  const VERSION = '2.2';
+  const VERSION = '3.0';
+
+  function addCss(attr, href) {
+    if (document.querySelector(`link[${attr}]`)) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `${href}?v=${VERSION}`;
+    link.setAttribute(attr, 'true');
+    document.head.appendChild(link);
+  }
 
   function loadCss() {
-    if (!document.querySelector('link[data-manari-social-v2]')) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = `social-layout.css?v=${VERSION}`;
-      link.setAttribute('data-manari-social-v2', 'true');
-      document.head.appendChild(link);
-    }
-    if (!document.querySelector('link[data-manari-transparency]')) {
-      const transparency = document.createElement('link');
-      transparency.rel = 'stylesheet';
-      transparency.href = `transparency-center.css?v=${VERSION}`;
-      transparency.setAttribute('data-manari-transparency', 'true');
-      document.head.appendChild(transparency);
-    }
+    addCss('data-manari-social-v2', 'social-layout.css');
+    addCss('data-manari-responsive', 'responsive-overrides.css');
+    addCss('data-manari-transparency', 'transparency-center.css');
+    addCss('data-manari-portal-internal', 'portal-internal.css');
+  }
+
+  function loadPortalInternal(next) {
+    if (window.ManariPortalInternal || document.querySelector('script[data-manari-portal-internal]')) { next?.(); return; }
+    const script = document.createElement('script');
+    script.src = `portal-internal.js?v=${VERSION}`;
+    script.async = false;
+    script.setAttribute('data-manari-portal-internal', 'true');
+    script.onload = () => next?.();
+    document.body.appendChild(script);
   }
 
   function loadTransparency() {
@@ -34,16 +41,17 @@
   }
 
   function loadFixes() {
+    const done = () => loadPortalInternal(loadTransparency);
     if (!document.querySelector('script[data-manari-social-fixes]')) {
       const fixes = document.createElement('script');
       fixes.src = `social-fixes.js?v=${VERSION}`;
       fixes.async = false;
       fixes.setAttribute('data-manari-social-fixes', 'true');
-      fixes.onload = loadTransparency;
+      fixes.onload = done;
       document.body.appendChild(fixes);
       return;
     }
-    loadTransparency();
+    done();
   }
 
   function loadScript() {
@@ -64,11 +72,7 @@
     document.body.appendChild(script);
   }
 
-  function boot() {
-    loadCss();
-    loadScript();
-  }
-
+  function boot() { loadCss(); loadScript(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
 })();
