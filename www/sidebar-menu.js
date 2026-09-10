@@ -5,24 +5,45 @@
   if (window.__MANARI_SOCIAL_BOOTSTRAP__) return;
   window.__MANARI_SOCIAL_BOOTSTRAP__ = true;
 
-  const VERSION = '2.0.2';
+  const VERSION = '2.2';
 
   function loadCss() {
-    if (document.querySelector('link[data-manari-social-v2]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = `social-layout.css?v=${VERSION}`;
-    link.setAttribute('data-manari-social-v2', 'true');
-    document.head.appendChild(link);
+    if (!document.querySelector('link[data-manari-social-v2]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `social-layout.css?v=${VERSION}`;
+      link.setAttribute('data-manari-social-v2', 'true');
+      document.head.appendChild(link);
+    }
+    if (!document.querySelector('link[data-manari-transparency]')) {
+      const transparency = document.createElement('link');
+      transparency.rel = 'stylesheet';
+      transparency.href = `transparency-center.css?v=${VERSION}`;
+      transparency.setAttribute('data-manari-transparency', 'true');
+      document.head.appendChild(transparency);
+    }
+  }
+
+  function loadTransparency() {
+    if (window.ManariTransparency || document.querySelector('script[data-manari-transparency]')) return;
+    const script = document.createElement('script');
+    script.src = `transparency-center.js?v=${VERSION}`;
+    script.async = false;
+    script.setAttribute('data-manari-transparency', 'true');
+    document.body.appendChild(script);
   }
 
   function loadFixes() {
-    if (document.querySelector('script[data-manari-social-fixes]')) return;
-    const fixes = document.createElement('script');
-    fixes.src = `social-fixes.js?v=${VERSION}`;
-    fixes.async = false;
-    fixes.setAttribute('data-manari-social-fixes', 'true');
-    document.body.appendChild(fixes);
+    if (!document.querySelector('script[data-manari-social-fixes]')) {
+      const fixes = document.createElement('script');
+      fixes.src = `social-fixes.js?v=${VERSION}`;
+      fixes.async = false;
+      fixes.setAttribute('data-manari-social-fixes', 'true');
+      fixes.onload = loadTransparency;
+      document.body.appendChild(fixes);
+      return;
+    }
+    loadTransparency();
   }
 
   function loadScript() {
