@@ -1,72 +1,72 @@
-/* Prefeitura de Manari — responsividade e legibilidade V2.2 */
+/* Prefeitura de Manari — responsividade e legibilidade V3 */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body.manari-social-v2{font-size:17px}
-
-/* Escala tipografica fluida: acompanha a largura util sem alterar o layout V2 */
-.sm-search input{font-size:clamp(15px,1.5vw,18px)}
-.sm-story span{font-size:clamp(12px,1.25vw,15px);line-height:1.2}
-.sm-tab{font-size:clamp(13px,1.25vw,16px)}
-.sm-post-meta b{font-size:clamp(14px,1.35vw,17px);line-height:1.3}
-.sm-post-meta small{font-size:clamp(11.5px,1.05vw,14px);line-height:1.3}
-.sm-post-text{font-size:clamp(15px,1.45vw,18px);line-height:1.6}
-.sm-post-actions button{font-size:clamp(12.5px,1.15vw,15px)!important}
-.sm-side-btn{font-size:clamp(14px,1.3vw,17px)}
-.sm-side-title{font-size:clamp(11px,1vw,13px)}
-.sm-brand-text{font-size:clamp(18px,1.55vw,22px)}
-.sm-brand-text small{font-size:clamp(10px,.95vw,12px)}
-.sm-quick-card b,.sm-info-row b,.sm-section-top strong{font-size:clamp(13px,1.2vw,16px)}
-.sm-info-row span{font-size:clamp(11px,1vw,13px);line-height:1.4}
-.sm-bottom-btn{font-size:clamp(11px,1.05vw,13px)}
-.sm-service b{font-size:clamp(15px,1.3vw,17px)}
-.sm-service span{font-size:clamp(13px,1.15vw,15px);line-height:1.5}
+body.manari-social-v2{font-size:18px}
+.sm-search input{font-size:clamp(17px,1.35vw,19px)}
+.sm-story span{font-size:clamp(14px,1.1vw,16px);line-height:1.25;font-weight:650}
+.sm-tab{font-size:clamp(15px,1.05vw,17px);font-weight:700}
+.sm-post-meta b{font-size:clamp(16px,1.15vw,18px);line-height:1.35}
+.sm-post-meta small{font-size:clamp(14px,.95vw,16px);line-height:1.35}
+.sm-post-text{font-size:clamp(18px,1.25vw,20px);line-height:1.65}
+.sm-post-actions button{font-size:clamp(14px,1vw,16px)!important}
+.sm-side-btn{font-size:clamp(16px,1.1vw,18px);font-weight:650}
+.sm-side-title{font-size:clamp(13px,.9vw,15px)}
+.sm-brand-text{font-size:clamp(20px,1.45vw,24px)}
+.sm-brand-text small{font-size:clamp(12px,.85vw,14px)}
+.sm-quick-card b,.sm-info-row b,.sm-section-top strong{font-size:clamp(15px,1vw,17px)}
+.sm-info-row span{font-size:clamp(14px,.9vw,16px);line-height:1.45}
+.sm-bottom-btn{font-size:clamp(13px,.95vw,15px)}
+.sm-service b{font-size:clamp(17px,1.1vw,19px)}
+.sm-service span{font-size:clamp(15px,1vw,17px);line-height:1.5}
+.sm-hero-copy p{font-size:clamp(17px,1.15vw,19px);line-height:1.55}
+.sm-pill{font-size:16px}
 
 @media (min-width:1200px){
-  body.manari-social-v2{font-size:17px}
-  .sm-side-btn{min-height:46px}
-  .sm-story span{font-size:13px}
-  .sm-tab{font-size:14px}
-  .sm-post-meta b{font-size:15px}.sm-post-meta small{font-size:12px}
-  .sm-post-text{font-size:15.5px;line-height:1.6}
-  .sm-quick-card b{font-size:14px}.sm-section-top strong{font-size:15px}
+  body.manari-social-v2{font-size:18px}
+  .sm-side-btn{font-size:17px;min-height:48px}
+  .sm-story span{font-size:14.5px}.sm-tab{font-size:16px}
+  .sm-post-meta b{font-size:17px}.sm-post-meta small{font-size:14px}
+  .sm-post-text{font-size:18px;line-height:1.65}
+  .sm-post-actions button{font-size:15px!important;min-height:42px}
+  .sm-quick-card b,.sm-info-row b{font-size:16px}.sm-info-row span{font-size:14px}.sm-section-top strong{font-size:17px}
 }
 
 @media (min-width:761px) and (max-width:1199px){
-  body.manari-social-v2{font-size:17px}
-  .sm-topbar{height:76px}.sm-search input{font-size:17px}
-  .sm-side-btn{font-size:15.5px;min-height:48px;padding:12px 11px}
-  .sm-story{min-width:80px}.sm-story-ring{width:64px;height:64px}.sm-story span{font-size:13px}
-  .sm-hero-copy h1{font-size:clamp(34px,4.2vw,48px)}.sm-hero-copy p{font-size:16px;line-height:1.55}
-  .sm-tab{font-size:14px;padding:12px 3px 10px}
-  .sm-post-meta b{font-size:15.5px}.sm-post-meta small{font-size:12.5px}
-  .sm-post-text{font-size:16px;line-height:1.6;padding:0 14px 12px}
-  .sm-post-actions button{font-size:14px!important;min-height:40px}
-  .sm-quick-card b{font-size:14px}.sm-info-row b{font-size:14px}.sm-info-row span{font-size:12px}
+  body.manari-social-v2{font-size:18px}
+  .sm-topbar{height:78px}.sm-search input{font-size:18px}
+  .sm-side-btn{font-size:17px;min-height:50px;padding:13px 12px}
+  .sm-story{min-width:86px}.sm-story-ring{width:68px;height:68px}.sm-story span{font-size:14.5px}
+  .sm-hero-copy h1{font-size:clamp(36px,4.4vw,50px)}.sm-hero-copy p{font-size:18px}
+  .sm-tab{font-size:16px;padding:13px 4px 11px}
+  .sm-post-meta b{font-size:17px}.sm-post-meta small{font-size:14px}
+  .sm-post-text{font-size:18px;line-height:1.65;padding:0 16px 14px}
+  .sm-post-actions button{font-size:15px!important;min-height:42px}
+  .sm-quick-card b,.sm-info-row b{font-size:16px}.sm-info-row span{font-size:14px}
 }
 
 @media (max-width:760px){
-  body.manari-social-v2{font-size:18px}
-  .sm-topbar{height:74px;padding:0 12px;gap:10px}
-  .sm-mobile-menu{width:46px;height:46px;font-size:24px;border-radius:14px}
-  .sm-top-logo{width:142px;height:50px}.sm-circle-btn{width:42px;height:42px;font-size:18px}
-  .sm-search{top:82px;left:10px;right:10px}.sm-search input{height:48px;font-size:17px;padding-left:44px}
-  .sm-content{padding:68px 10px 88px}
-  .sm-stories{gap:12px;padding-bottom:16px}.sm-story{min-width:80px}.sm-story-ring{width:64px;height:64px}.sm-story-inner{font-size:28px}.sm-story span{font-size:13.5px;max-width:82px;font-weight:600}
-  .sm-hero{min-height:300px;border-radius:18px}.sm-hero-copy{width:74%;padding:24px 18px}.sm-hero-copy h1{font-size:clamp(29px,8vw,39px);line-height:1.03;margin-bottom:12px}.sm-hero-copy p{font-size:16px;line-height:1.5;max-width:285px;margin-bottom:16px}.sm-pill{font-size:15px;padding:11px 17px}
-  .sm-tabs{gap:20px;margin:16px 0 12px;padding-bottom:1px}.sm-tab{font-size:14.5px;padding:12px 2px 10px;font-weight:600}
-  .sm-feed-grid{gap:14px}.sm-post{border-radius:16px}.sm-post-head{padding:14px 14px 10px}.sm-post-avatar{width:44px;height:44px}.sm-post-meta b{font-size:15.5px;line-height:1.3}.sm-post-meta small{font-size:12.5px;margin-top:3px}.sm-post-text{font-size:17px;line-height:1.6;padding:0 14px 14px}
-  .sm-post-actions{padding:10px 14px 12px;gap:18px}.sm-post-actions button{font-size:13.5px!important;min-height:42px;display:inline-flex;align-items:center}
-  .sm-bottom-nav{min-height:72px;padding-top:7px}.sm-bottom-btn{font-size:12px;min-height:56px;font-weight:600}.sm-bottom-btn i{font-size:23px}
-  .sm-sidebar{width:min(90vw,370px);padding:18px 14px 22px}.sm-brand{padding:6px 8px 18px}.sm-brand img{width:58px;height:58px}.sm-brand-text{font-size:19px}.sm-brand-text small{font-size:11px}.sm-side-title{font-size:12px;padding:12px 10px 8px}.sm-side-btn{font-size:16px;min-height:50px;padding:12px 12px;margin:2px 0}.sm-side-ico{font-size:20px;width:25px}.sm-share{margin-top:16px;min-height:52px}
-  .sm-services-panel,.sm-dept-panel{padding:20px 16px}.sm-services-head h2,.sm-dept-head h2{font-size:23px}.sm-services-search{height:50px;font-size:17px}.sm-service{padding:15px}.sm-service b{font-size:16px}.sm-service span{font-size:14px;line-height:1.5}.sm-dept-item{min-height:54px;font-size:16px}
+  body.manari-social-v2{font-size:19px}
+  .sm-topbar{height:76px;padding:0 12px;gap:10px}
+  .sm-mobile-menu{width:48px;height:48px;font-size:25px;border-radius:14px}
+  .sm-top-logo{width:146px;height:52px}.sm-circle-btn{width:44px;height:44px;font-size:19px}
+  .sm-search{top:84px;left:10px;right:10px}.sm-search input{height:50px;font-size:18px;padding-left:44px}
+  .sm-content{padding:70px 10px 90px}
+  .sm-stories{gap:12px;padding-bottom:17px}.sm-story{min-width:82px}.sm-story-ring{width:66px;height:66px}.sm-story-inner{font-size:29px}.sm-story span{font-size:14.5px;max-width:86px}
+  .sm-hero{min-height:305px;border-radius:18px}.sm-hero-copy{width:78%;padding:24px 18px}.sm-hero-copy h1{font-size:clamp(31px,8.5vw,40px);line-height:1.04;margin-bottom:12px}.sm-hero-copy p{font-size:18px;line-height:1.55;max-width:300px;margin-bottom:17px}.sm-pill{font-size:16px;padding:12px 18px}
+  .sm-tabs{gap:20px;margin:16px 0 12px}.sm-tab{font-size:16px;padding:13px 2px 11px}
+  .sm-feed-grid{gap:14px}.sm-post{border-radius:16px}.sm-post-head{padding:15px 14px 11px}.sm-post-avatar{width:46px;height:46px}.sm-post-meta b{font-size:17px}.sm-post-meta small{font-size:14px;margin-top:3px}.sm-post-text{font-size:18.5px;line-height:1.65;padding:0 14px 15px}
+  .sm-post-actions{padding:10px 14px 12px;gap:18px}.sm-post-actions button{font-size:15px!important;min-height:44px}
+  .sm-bottom-nav{min-height:74px;padding-top:7px}.sm-bottom-btn{font-size:13px;min-height:58px;font-weight:700}.sm-bottom-btn i{font-size:24px}
+  .sm-sidebar{width:min(92vw,380px);padding:18px 14px 22px}.sm-brand{padding:6px 8px 18px}.sm-brand img{width:60px;height:60px}.sm-brand-text{font-size:21px}.sm-brand-text small{font-size:13px}.sm-side-title{font-size:13px;padding:12px 10px 8px}.sm-side-btn{font-size:17px;min-height:52px;padding:13px 12px;margin:2px 0}.sm-side-ico{font-size:21px;width:26px}.sm-share{margin-top:16px;min-height:54px}
+  .sm-services-panel,.sm-dept-panel{padding:20px 16px}.sm-services-head h2,.sm-dept-head h2{font-size:25px}.sm-services-search{height:52px;font-size:18px}.sm-service{padding:16px}.sm-service b{font-size:18px}.sm-service span{font-size:16px}.sm-dept-item{min-height:56px;font-size:17px}
 }
 
 @media (max-width:430px){
-  body.manari-social-v2{font-size:18px}
-  .sm-top-logo{width:132px}.sm-story{min-width:76px}.sm-story-ring{width:60px;height:60px}.sm-story span{font-size:13px}.sm-hero{min-height:285px}.sm-hero-copy{width:78%;padding:22px 16px}.sm-hero-copy h1{font-size:30px}.sm-hero-copy p{font-size:15.5px}.sm-post-text{font-size:17px}.sm-post-meta b{font-size:15.5px}.sm-post-meta small{font-size:12px}.sm-tab{font-size:14px}.sm-side-btn{font-size:16px}.sm-bottom-btn{font-size:11.5px}
+  body.manari-social-v2{font-size:19px}
+  .sm-top-logo{width:136px}.sm-story{min-width:78px}.sm-story-ring{width:62px;height:62px}.sm-story span{font-size:14px}.sm-hero{min-height:292px}.sm-hero-copy{width:80%;padding:22px 16px}.sm-hero-copy h1{font-size:31px}.sm-hero-copy p{font-size:17.5px}.sm-post-text{font-size:18.5px}.sm-post-meta b{font-size:17px}.sm-post-meta small{font-size:14px}.sm-tab{font-size:15.5px}.sm-side-btn{font-size:17px}.sm-bottom-btn{font-size:12.5px}
 }
 
 @media (min-width:431px) and (max-width:760px){
-  .sm-post-text{font-size:17.5px}.sm-post-meta b{font-size:16px}.sm-story span{font-size:14px}.sm-tab{font-size:15px}.sm-bottom-btn{font-size:12.5px}
+  .sm-post-text{font-size:19px}.sm-post-meta b{font-size:17.5px}.sm-story span{font-size:15px}.sm-tab{font-size:16.5px}.sm-bottom-btn{font-size:13.5px}
 }
 
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
