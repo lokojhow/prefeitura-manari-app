@@ -1,5 +1,5 @@
-const CACHE='manari-v3-portal-interno';
-const VERSION='3.0';
+const CACHE='manari-v3-2-portal-interno';
+const VERSION='3.2';
 const CORE=['./','index.html','styles.css','social-layout.css','responsive-overrides.css','transparency-center.css','portal-internal.css','app.js','config.js','laws.js','sidebar-menu.js','social-layout.js','social-fixes.js','transparency-center.js','portal-internal.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
 const SUPABASE_CDN='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
 
