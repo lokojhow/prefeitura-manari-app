@@ -1,116 +1,94 @@
-// Prefeitura de Manari — navegação horizontal estável das secretarias.
-// Esta rotina é a autoridade final sobre a posição da faixa enquanto uma secretaria é trocada.
-// Ela neutraliza reposicionamentos concorrentes causados por rerenderizações assíncronas.
+// Prefeitura de Manari — menu lateral vertical de Secretarias V5.1
 (() => {
+  if (window.__MANARI_VERTICAL_SECRETARIAS__) return;
+  window.__MANARI_VERTICAL_SECRETARIAS__ = true;
+
   const STRIP = '.secretaria-strip';
   const CHIP = '.secretaria-chip[data-dept]';
+  let lastStrip = null;
+  let sourceContainer = null;
 
-  let selectedDept = null;
-  let savedTop = null;
-  let activeUntil = 0;
-  let timers = [];
-  let raf = 0;
-  let correcting = false;
-  let observedStrip = null;
-
-  const getStrip = () => document.querySelector(STRIP);
-
-  const getChip = (strip, dept) => {
-    if (!strip || !dept) return null;
-    return Array.from(strip.querySelectorAll(CHIP))
-      .find(chip => chip.dataset.dept === dept) || null;
-  };
-
-  const getTargetLeft = (strip, chip) => {
-    if (!strip || !chip) return 0;
-    const max = Math.max(0, strip.scrollWidth - strip.clientWidth);
-    return Math.max(
-      0,
-      Math.min(
-        max,
-        chip.offsetLeft - ((strip.clientWidth - chip.offsetWidth) / 2)
-      )
-    );
-  };
-
-  const centerSelected = () => {
-    if (!selectedDept || Date.now() > activeUntil) return;
-
-    cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(() => {
-      const strip = getStrip();
-      const chip = getChip(strip, selectedDept);
-
-      if (strip && chip) {
-        const target = getTargetLeft(strip, chip);
-        if (Math.abs(strip.scrollLeft - target) > 1) {
-          correcting = true;
-          strip.scrollLeft = target;
-          requestAnimationFrame(() => { correcting = false; });
-        }
+  function ensureStyle(){
+    if(document.getElementById('manari-secretarias-vertical-style')) return;
+    const s=document.createElement('style');
+    s.id='manari-secretarias-vertical-style';
+    s.textContent=`
+      :root{--manari-sector-rail:148px}
+      body.manari-sector-rail-active{padding-left:var(--manari-sector-rail)!important;box-sizing:border-box!important}
+      #manariSecretariasRail{position:fixed;left:0;top:74px;bottom:12px;width:var(--manari-sector-rail);z-index:2147481000;background:rgba(255,255,255,.98);border:1px solid #e2e8e3;border-left:0;border-radius:0 18px 18px 0;box-shadow:8px 0 24px rgba(14,59,37,.10);display:flex;flex-direction:column;overflow:hidden}
+      #manariSecretariasRail .msr-head{padding:13px 10px 10px;border-bottom:1px solid #e6ece8;color:#153f2b;font:800 13px/1.2 inherit;text-align:center}
+      #manariSecretariasRail .secretaria-strip{display:flex!important;flex-direction:column!important;gap:7px!important;overflow-y:auto!important;overflow-x:hidden!important;scroll-behavior:auto!important;padding:9px!important;width:auto!important;max-width:none!important;min-width:0!important;white-space:normal!important;scroll-snap-type:none!important;overscroll-behavior:contain}
+      #manariSecretariasRail .secretaria-chip{flex:0 0 auto!important;width:100%!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important;margin:0!important;white-space:normal!important;scroll-snap-align:none!important;justify-content:flex-start!important;text-align:left!important;border-radius:12px!important;padding:9px 8px!important;min-height:52px!important}
+      #manariSecretariasRail .secretaria-chip *{white-space:normal!important}
+      .manari-sector-source-hidden{display:none!important}
+      @media(max-width:700px){
+        :root{--manari-sector-rail:96px}
+        #manariSecretariasRail{top:66px;bottom:8px;border-radius:0 14px 14px 0}
+        #manariSecretariasRail .msr-head{font-size:11px;padding:10px 5px 7px}
+        #manariSecretariasRail .secretaria-strip{gap:6px!important;padding:6px!important}
+        #manariSecretariasRail .secretaria-chip{padding:7px 5px!important;min-height:48px!important;font-size:10.5px!important;line-height:1.15!important;justify-content:center!important;text-align:center!important;flex-direction:column!important}
+        #manariSecretariasRail .secretaria-chip img,#manariSecretariasRail .secretaria-chip svg,#manariSecretariasRail .secretaria-chip .icon{max-width:24px!important;max-height:24px!important}
       }
+    `;
+    document.head.appendChild(s);
+  }
 
-      if (savedTop !== null && Math.abs(window.scrollY - savedTop) > 1) {
-        window.scrollTo({ top: savedTop, left: 0, behavior: 'auto' });
-      }
-    });
-  };
+  function rail(){
+    let r=document.getElementById('manariSecretariasRail');
+    if(!r){
+      r=document.createElement('aside');
+      r.id='manariSecretariasRail';
+      r.setAttribute('aria-label','Secretarias e áreas');
+      r.innerHTML='<div class="msr-head">Secretarias e áreas</div>';
+      document.body.appendChild(r);
+    }
+    return r;
+  }
 
-  const bindStripGuard = () => {
-    const strip = getStrip();
-    if (!strip || strip === observedStrip) return;
+  function hideOldContainer(strip){
+    const p=strip.parentElement;
+    if(!p || p.id==='manariSecretariasRail') return;
+    sourceContainer=p;
+    // A faixa antiga fica vazia no conteúdo principal; escondemos apenas o bloco que a continha
+    // quando ele aparenta ser o bloco exclusivo de navegação das secretarias.
+    const text=(p.textContent||'').toLowerCase();
+    if(text.includes('secretarias') || p.children.length<=4) p.classList.add('manari-sector-source-hidden');
+  }
 
-    observedStrip = strip;
-    strip.addEventListener('scroll', () => {
-      if (correcting || !selectedDept || Date.now() > activeUntil) return;
-      // Qualquer rotina antiga que tente recolocar a faixa em outra posição é corrigida no mesmo ciclo.
-      centerSelected();
-    }, { passive: true });
-  };
+  function install(){
+    ensureStyle();
+    const candidates=[...document.querySelectorAll(STRIP)].filter(x=>!x.closest('#manariSecretariasRail'));
+    const strip=candidates[0] || document.querySelector('#manariSecretariasRail '+STRIP);
+    if(!strip) return false;
+    if(strip.closest('#manariSecretariasRail')){document.body.classList.add('manari-sector-rail-active');lastStrip=strip;return true;}
 
-  const runStabilization = () => {
-    timers.forEach(clearTimeout);
-    timers = [];
+    hideOldContainer(strip);
+    const r=rail();
+    r.appendChild(strip);
+    strip.scrollLeft=0;
+    document.body.classList.add('manari-sector-rail-active');
+    lastStrip=strip;
+    return true;
+  }
 
-    activeUntil = Date.now() + 4500;
-    [0, 16, 32, 50, 80, 120, 180, 260, 360, 500, 700, 950, 1250, 1600, 2100, 2800, 3600, 4400].forEach(delay => {
-      timers.push(setTimeout(() => {
-        bindStripGuard();
-        centerSelected();
-      }, delay));
-    });
+  // Não há mais navegação horizontal nem rotina que tente recentralizar a faixa.
+  // O item selecionado apenas é mantido visível verticalmente, sem alterar a posição da página.
+  document.addEventListener('click',e=>{
+    const chip=e.target.closest?.('#manariSecretariasRail '+CHIP);
+    if(!chip) return;
+    requestAnimationFrame(()=>chip.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'}));
+  },true);
 
-    timers.push(setTimeout(() => {
-      centerSelected();
-      savedTop = null;
-    }, 4550));
-  };
-
-  document.addEventListener('click', event => {
-    const chip = event.target.closest?.(CHIP);
-    if (!chip) return;
-
-    selectedDept = chip.dataset.dept;
-    savedTop = window.scrollY;
-    bindStripGuard();
-    runStabilization();
-  }, true);
-
-  const observer = new MutationObserver(() => {
-    bindStripGuard();
-    if (selectedDept && Date.now() <= activeUntil) centerSelected();
+  let queued=false;
+  const observer=new MutationObserver(()=>{
+    if(queued) return;queued=true;
+    requestAnimationFrame(()=>{queued=false;install();});
   });
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  observer.observe(document.documentElement,{childList:true,subtree:true});
 
-  window.addEventListener('resize', () => {
-    bindStripGuard();
-    if (!selectedDept) return;
-    const strip = getStrip();
-    const chip = getChip(strip, selectedDept);
-    if (!strip || !chip) return;
-    strip.scrollLeft = getTargetLeft(strip, chip);
-  });
-
-  window.addEventListener('pageshow', bindStripGuard);
-  bindStripGuard();
+  window.addEventListener('pageshow',install);
+  window.addEventListener('resize',()=>{if(lastStrip)lastStrip.scrollLeft=0;});
+  install();
+  setTimeout(install,500);
+  setTimeout(install,1500);
 })();
