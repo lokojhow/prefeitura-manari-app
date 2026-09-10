@@ -1,38 +1,16 @@
-// Prefeitura de Manari — modo clássico V5.1
+// Prefeitura de Manari — modo clássico V5.3
 (() => {
   if (window.__MANARI_CLASSIC_BOOTSTRAP__) return;
   window.__MANARI_CLASSIC_BOOTSTRAP__ = true;
-  const VERSION = '5.1';
-
+  const VERSION = '5.3';
   document.getElementById('manariSocialApp')?.remove();
   document.body?.classList.remove('manari-social-v2');
   document.querySelectorAll('#app,.app-shell,.site-shell,main').forEach(el=>el.removeAttribute('aria-hidden'));
   document.getElementById('manari-v4-boot-gate')?.remove();
   document.getElementById('manari-preboot')?.remove();
-
-  function addCss(attr, href){if(document.querySelector(`link[${attr}]`)) return;const l=document.createElement('link');l.rel='stylesheet';l.href=`${href}?v=${VERSION}`;l.setAttribute(attr,'true');document.head.appendChild(l);}
-  function loadScriptOnce(attr, src, ready, next){if(ready?.()){next?.();return;}const old=document.querySelector(`script[${attr}]`);if(old){old.addEventListener('load',()=>next?.(),{once:true});return;}const s=document.createElement('script');s.src=`${src}?v=${VERSION}`;s.async=false;s.setAttribute(attr,'true');s.onload=()=>next?.();s.onerror=()=>next?.();document.body.appendChild(s);}
-
-  function addAdminButton(){
-    if(document.getElementById('manariClassicAdmin')) return;
-    const style=document.createElement('style');style.id='manari-classic-admin-style';style.textContent=`#manariClassicAdmin{position:fixed;right:18px;bottom:20px;z-index:2147482000;border:0;border-radius:999px;background:#0b7d46;color:#fff;padding:12px 17px;font:700 14px/1.2 inherit;box-shadow:0 8px 24px rgba(0,0,0,.22);cursor:pointer}#manariClassicAdmin:active{transform:scale(.98)}@media(max-width:700px){#manariClassicAdmin{right:12px;bottom:14px;padding:11px 14px;font-size:13px}}`;document.head.appendChild(style);
-    const b=document.createElement('button');b.id='manariClassicAdmin';b.type='button';b.innerHTML='⚙ Administrativo';b.addEventListener('click',()=>{if(window.ManariPortalAuth?.open)window.ManariPortalAuth.open();else loadScriptOnce('data-manari-portal-auth','portal-auth.js',()=>window.ManariPortalAuth,()=>window.ManariPortalAuth?.open?.());});document.body.appendChild(b);
-  }
-
-  function boot(){
-    addCss('data-manari-portal-auth','portal-auth.css');
-    addCss('data-manari-portal-cms','portal-cms.css');
-    addCss('data-manari-portal-internal','portal-internal.css');
-    addCss('data-manari-transparency','transparency-center.css');
-    loadScriptOnce('data-manari-nav-fix','nav-fix.js',()=>window.__MANARI_VERTICAL_SECRETARIAS__,()=>{});
-    loadScriptOnce('data-manari-portal-internal','portal-internal.js',()=>window.ManariPortalInternal,()=>
-      loadScriptOnce('data-manari-portal-auth','portal-auth.js',()=>window.ManariPortalAuth,()=>
-        loadScriptOnce('data-manari-portal-cms','portal-cms.js',()=>window.ManariSectorCMS,()=>
-          loadScriptOnce('data-manari-portal-cms-bridge','portal-cms-bridge.js',()=>window.__MANARI_CMS_BRIDGE__,addAdminButton)
-        )
-      )
-    );
-    setTimeout(addAdminButton,1800);
-  }
+  function addCss(attr,href){if(document.querySelector(`link[${attr}]`))return;const l=document.createElement('link');l.rel='stylesheet';l.href=`${href}?v=${VERSION}`;l.setAttribute(attr,'true');document.head.appendChild(l)}
+  function loadScriptOnce(attr,src,ready,next){if(ready?.()){next?.();return}const old=document.querySelector(`script[${attr}]`);if(old){old.addEventListener('load',()=>next?.(),{once:true});return}const s=document.createElement('script');s.src=`${src}?v=${VERSION}`;s.async=false;s.setAttribute(attr,'true');s.onload=()=>next?.();s.onerror=()=>next?.();document.body.appendChild(s)}
+  function addAdminButton(){if(document.getElementById('manariClassicAdmin'))return;const style=document.createElement('style');style.id='manari-classic-admin-style';style.textContent=`#manariClassicAdmin{position:fixed;right:18px;bottom:20px;z-index:2147482000;border:0;border-radius:999px;background:#0b7d46;color:#fff;padding:12px 17px;font:700 14px/1.2 inherit;box-shadow:0 8px 24px rgba(0,0,0,.22);cursor:pointer}#manariClassicAdmin:active{transform:scale(.98)}@media(max-width:700px){#manariClassicAdmin{right:12px;bottom:14px;padding:11px 14px;font-size:13px}}`;document.head.appendChild(style);const b=document.createElement('button');b.id='manariClassicAdmin';b.className='manari-admin-entry';b.type='button';b.innerHTML='⚙ Administrativo';b.addEventListener('click',()=>{if(window.ManariPortalAuth?.open)window.ManariPortalAuth.open();else loadScriptOnce('data-manari-portal-auth','portal-auth.js',()=>window.ManariPortalAuth,()=>window.ManariPortalAuth?.open?.())});document.body.appendChild(b)}
+  function boot(){addCss('data-manari-portal-auth','portal-auth.css');addCss('data-manari-portal-cms','portal-cms.css');addCss('data-manari-portal-internal','portal-internal.css');addCss('data-manari-transparency','transparency-center.css');addCss('data-manari-portal-editor','portal-editor.css');loadScriptOnce('data-manari-nav-fix','nav-fix.js',()=>window.__MANARI_VERTICAL_SECRETARIAS__,()=>{});loadScriptOnce('data-manari-portal-internal','portal-internal.js',()=>window.ManariPortalInternal,()=>loadScriptOnce('data-manari-portal-auth','portal-auth.js',()=>window.ManariPortalAuth,()=>loadScriptOnce('data-manari-portal-cms','portal-cms.js',()=>window.ManariSectorCMS,()=>loadScriptOnce('data-manari-portal-cms-bridge','portal-cms-bridge.js',()=>window.__MANARI_CMS_BRIDGE__,()=>loadScriptOnce('data-manari-portal-editor','portal-editor.js',()=>window.ManariPortalEditor,addAdminButton)))));setTimeout(addAdminButton,1800)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
