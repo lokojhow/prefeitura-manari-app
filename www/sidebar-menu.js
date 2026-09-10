@@ -1,9 +1,9 @@
-// Prefeitura de Manari — ponte de atualização para o layout Social V3.2
+// Prefeitura de Manari — ponte de atualização para o layout Social V3.3
 (() => {
   if (window.__MANARI_SOCIAL_BOOTSTRAP__) return;
   window.__MANARI_SOCIAL_BOOTSTRAP__ = true;
 
-  const VERSION = '3.2';
+  const VERSION = '3.3';
 
   function addCss(attr, href) {
     if (document.querySelector(`link[${attr}]`)) return;
@@ -19,25 +19,27 @@
     addCss('data-manari-responsive', 'responsive-overrides.css');
     addCss('data-manari-transparency', 'transparency-center.css');
     addCss('data-manari-portal-internal', 'portal-internal.css');
+    addCss('data-manari-portal-auth', 'portal-auth.css');
   }
 
-  function loadPortalInternal(next) {
-    if (window.ManariPortalInternal || document.querySelector('script[data-manari-portal-internal]')) { next?.(); return; }
+  function loadScriptOnce(attr, src, ready, next) {
+    if (ready?.() || document.querySelector(`script[${attr}]`)) { next?.(); return; }
     const script = document.createElement('script');
-    script.src = `portal-internal.js?v=${VERSION}`;
+    script.src = `${src}?v=${VERSION}`;
     script.async = false;
-    script.setAttribute('data-manari-portal-internal', 'true');
+    script.setAttribute(attr, 'true');
     script.onload = () => next?.();
     document.body.appendChild(script);
   }
 
+  function loadPortalAuth(next) {
+    loadScriptOnce('data-manari-portal-auth','portal-auth.js',()=>window.ManariPortalAuth,next);
+  }
+  function loadPortalInternal(next) {
+    loadScriptOnce('data-manari-portal-internal','portal-internal.js',()=>window.ManariPortalInternal,next);
+  }
   function loadTransparency() {
-    if (window.ManariTransparency || document.querySelector('script[data-manari-transparency]')) return;
-    const script = document.createElement('script');
-    script.src = `transparency-center.js?v=${VERSION}`;
-    script.async = false;
-    script.setAttribute('data-manari-transparency', 'true');
-    document.body.appendChild(script);
+    loadScriptOnce('data-manari-transparency','transparency-center.js',()=>window.ManariTransparency);
   }
 
   function loadFixes() {
@@ -74,7 +76,7 @@
 
   function boot() {
     loadCss();
-    loadPortalInternal(loadSocial);
+    loadPortalInternal(() => loadPortalAuth(loadSocial));
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
