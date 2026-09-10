@@ -1,5 +1,5 @@
-const CACHE='manari-v4-2-no-legacy-flash';
-const VERSION='4.2';
+const CACHE='manari-v4-4-admin-click';
+const VERSION='4.4';
 const CORE=['./','index.html','styles.css','social-layout.css','responsive-overrides.css','transparency-center.css','portal-internal.css','portal-auth.css','portal-cms.css','app.js','config.js','laws.js','sidebar-menu.js','social-layout.js','social-fixes.js','transparency-center.js','portal-internal.js','portal-auth.js','portal-cms.js','portal-cms-bridge.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
 const SUPABASE_CDN='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
