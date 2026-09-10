@@ -1,6 +1,6 @@
-const CACHE='manari-v3-2-portal-interno';
-const VERSION='3.2';
-const CORE=['./','index.html','styles.css','social-layout.css','responsive-overrides.css','transparency-center.css','portal-internal.css','app.js','config.js','laws.js','sidebar-menu.js','social-layout.js','social-fixes.js','transparency-center.js','portal-internal.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
+const CACHE='manari-v3-3-painel-setorial';
+const VERSION='3.3';
+const CORE=['./','index.html','styles.css','social-layout.css','responsive-overrides.css','transparency-center.css','portal-internal.css','portal-auth.css','app.js','config.js','laws.js','sidebar-menu.js','social-layout.js','social-fixes.js','transparency-center.js','portal-internal.js','portal-auth.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
 const SUPABASE_CDN='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
 
 self.addEventListener('install',e=>e.waitUntil(
@@ -29,6 +29,7 @@ async function prepareResponse(request,response){
       if(!html.includes('responsive-overrides.css')) head.push(`<link rel="stylesheet" href="responsive-overrides.css?v=${VERSION}">`);
       if(!html.includes('transparency-center.css')) head.push(`<link rel="stylesheet" href="transparency-center.css?v=${VERSION}">`);
       if(!html.includes('portal-internal.css')) head.push(`<link rel="stylesheet" href="portal-internal.css?v=${VERSION}">`);
+      if(!html.includes('portal-auth.css')) head.push(`<link rel="stylesheet" href="portal-auth.css?v=${VERSION}">`);
       if(head.length) html=html.includes('</head>')?html.replace('</head>',`${head.join('')}</head>`):`${head.join('')}${html}`;
       const scripts=[];
       if(!html.includes('laws.js')) scripts.push('<script src="laws.js"></script>');
