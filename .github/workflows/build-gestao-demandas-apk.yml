@@ -11,6 +11,9 @@ on:
       - "package.json"
       - "package-lock.json"
 
+permissions:
+  contents: write
+
 jobs:
   build-gestao-apk:
     runs-on: ubuntu-latest
@@ -90,12 +93,27 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
+      - name: Preparar APK final
+        run: |
+          cp gestao-build/android/app/build/outputs/apk/debug/app-debug.apk Manari-Gestao-Demandas.apk
+
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
           name: Manari-Gestao-Demandas-APK
-          path: gestao-build/android/app/build/outputs/apk/debug/app-debug.apk
+          path: Manari-Gestao-Demandas.apk
           if-no-files-found: error
           retention-days: 30
 
-# rebuild 2026-09-11 trello
+      - name: Publicar APK em release fixa
+        uses: ncipollo/release-action@v1
+        with:
+          tag: gestao-demandas-latest
+          name: Manari Gestão de Demandas — APK atual
+          body: APK mais recente do Gestão de Demandas da Comunicação de Manari.
+          artifacts: Manari-Gestao-Demandas.apk
+          allowUpdates: true
+          replacesArtifacts: true
+          makeLatest: true
+
+# rebuild 2026-09-11 trello release
