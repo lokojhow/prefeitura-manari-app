@@ -20,6 +20,8 @@ jobs:
         run: |
           node --check www/gestao-demandas/app.js
           node --check www/gestao-demandas/calendar-addon.js
+          node --check www/gestao-demandas/trello-board-addon.js
+          node --check www/gestao-demandas/trello-card-detail-addon.js
           node --check www/gestao-demandas/config.js
 
       - name: Validar manifesto e arquivos essenciais
@@ -28,7 +30,7 @@ jobs:
           import json
           from pathlib import Path
           root = Path('www/gestao-demandas')
-          required = ['index.html','styles.css','app.js','config.js','calendar-addon.js','manifest.webmanifest','service-worker.js']
+          required = ['index.html','styles.css','app.js','config.js','calendar-addon.js','trello-board-addon.js','trello-card-detail-addon.js','manifest.webmanifest','service-worker.js']
           missing = [name for name in required if not (root/name).exists()]
           if missing:
               raise SystemExit('Arquivos ausentes: ' + ', '.join(missing))
@@ -46,5 +48,8 @@ jobs:
                   raise SystemExit(f'Elemento não usado no JS: {element_id}')
           if html.count('id="view-calendario"') != 1:
               raise SystemExit('Calendário duplicado ou ausente')
+          cal = (root/'calendar-addon.js').read_text(encoding='utf-8')
+          if 'trello-board-addon.js' not in cal or 'trello-card-detail-addon.js' not in cal:
+              raise SystemExit('Addons do quadro não carregados pelo calendário')
           print('Gestão de Demandas: validação concluída.')
           PY
