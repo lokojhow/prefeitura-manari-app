@@ -12,7 +12,7 @@ on:
       - "package-lock.json"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build-gestao-apk:
@@ -110,6 +110,7 @@ jobs:
       - name: Preparar APK final
         run: |
           cp gestao-build/android/app/build/outputs/apk/debug/app-debug.apk Manari-Gestao-Demandas.apk
+          test -s Manari-Gestao-Demandas.apk
 
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
@@ -118,16 +119,5 @@ jobs:
           path: Manari-Gestao-Demandas.apk
           if-no-files-found: error
           retention-days: 30
-
-      - name: Publicar APK em release fixa
-        uses: ncipollo/release-action@v1
-        with:
-          tag: gestao-demandas-latest
-          name: Manari Gestão de Demandas — APK atual
-          body: APK mais recente do Gestão de Demandas da Comunicação de Manari.
-          artifacts: Manari-Gestao-Demandas.apk
-          allowUpdates: true
-          replacesArtifacts: true
-          makeLatest: true
 
 # calendário, alarmes locais e permissão de alarmes exatos
