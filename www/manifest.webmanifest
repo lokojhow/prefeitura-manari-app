@@ -4,9 +4,8 @@
   "description": "Aplicativo oficial da Prefeitura Municipal de Manari",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f7f5ed",
-  "theme_color": "#073a22",
-  "orientation": "portrait-primary",
+  "background_color": "#fffefa",
+  "theme_color": "#fffefa",
   "icons": [
     {
       "src": "app-icon-192.png",
