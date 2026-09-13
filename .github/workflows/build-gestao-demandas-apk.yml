@@ -89,6 +89,18 @@ jobs:
         working-directory: gestao-build
         run: npx cap sync android
 
+      - name: Liberar alarmes exatos no Android
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('gestao-build/android/app/src/main/AndroidManifest.xml')
+          s=p.read_text(encoding='utf-8')
+          perm='<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />'
+          if perm not in s:
+              s=s.replace('<application', perm+'\n    <application', 1)
+          p.write_text(s,encoding='utf-8')
+          PY
+
       - name: Gerar APK
         working-directory: gestao-build/android
         run: |
@@ -118,4 +130,4 @@ jobs:
           replacesArtifacts: true
           makeLatest: true
 
-# calendário e alarmes locais
+# calendário, alarmes locais e permissão de alarmes exatos
