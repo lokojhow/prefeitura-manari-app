@@ -1,0 +1,49 @@
+/* Prefeitura de Manari — otimização responsiva V5.4 */
+html,body{max-width:100%;overflow-x:hidden}
+body{padding-top:env(safe-area-inset-top);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
+.topbar{top:env(safe-area-inset-top);padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
+.hero-visual img,.feature-card img,.media-preview img{max-width:100%;object-fit:cover}
+@media(max-width:900px){
+  :root{--manari-sector-rail:104px!important}
+  body.manari-sector-rail-active{padding-left:var(--manari-sector-rail)!important}
+  .main-view{width:calc(100vw - var(--manari-sector-rail));max-width:calc(100vw - var(--manari-sector-rail));padding:10px 10px 90px!important}
+  .page-wrap{width:100%;max-width:100%;overflow:hidden}
+  .hero{grid-template-columns:1fr!important;gap:10px!important}
+  .hero-copy{padding:12px 6px 6px!important}
+  .hero-copy h1{font-size:clamp(30px,7.2vw,43px)!important;line-height:1!important;letter-spacing:-.035em!important}
+  .hero-copy p{font-size:14px!important;line-height:1.45!important}
+  .hero-visual{min-height:0!important;height:auto!important;aspect-ratio:4/3;border-radius:30px 20px 34px 20px!important}
+  .hero-visual img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important}
+  .quick-values{grid-template-columns:repeat(4,minmax(0,1fr))!important;max-width:100%!important;gap:3px!important}
+  .quick-value strong{font-size:10px!important;overflow-wrap:anywhere}
+  .home-feature-row{grid-template-columns:1fr!important;gap:10px!important}
+  .feature-card{grid-template-columns:minmax(120px,42%) minmax(0,1fr)!important;min-height:150px!important;width:100%!important}
+  .feature-card img{width:100%!important;height:100%!important;object-fit:cover!important}
+  .feature-card div{min-width:0;padding:13px!important}
+  .feature-card h3{font-size:18px!important;overflow-wrap:anywhere}
+  .service-grid,.popular-grid{grid-template-columns:1fr!important}
+  .action-band,.program-band{grid-template-columns:1fr!important}
+  #manariSecretariasRail{width:var(--manari-sector-rail)!important;top:calc(66px + env(safe-area-inset-top))!important;bottom:max(8px,env(safe-area-inset-bottom))!important}
+  #manariSecretariasRail .msr-head{font-size:10px!important;padding:9px 5px 7px!important}
+  #manariSecretariasRail .secretaria-strip{padding:6px!important;gap:5px!important}
+  #manariSecretariasRail .secretaria-chip{width:100%!important;min-height:52px!important;padding:6px 4px!important;font-size:9.5px!important;line-height:1.08!important;gap:4px!important;justify-content:center!important;align-items:center!important;text-align:center!important;flex-direction:column!important;overflow:hidden!important}
+  #manariSecretariasRail .secretaria-chip img{width:30px!important;height:30px!important;max-width:30px!important;max-height:30px!important;object-fit:contain!important;flex:0 0 30px!important}
+  #manariSecretariasRail .secretaria-chip span,#manariSecretariasRail .secretaria-chip strong{max-width:100%!important;overflow-wrap:anywhere!important}
+}
+@media(max-width:520px){
+  :root{--manari-sector-rail:92px!important}
+  .topbar{height:64px!important;padding-top:6px!important;padding-bottom:6px!important}
+  .brand img{width:156px!important;height:48px!important}
+  .main-view{padding:8px 8px 88px!important}
+  .hero-copy h1{font-size:31px!important}
+  .hero-visual{aspect-ratio:1/1!important}
+  .feature-card{grid-template-columns:40% 60%!important;min-height:142px!important}
+  .feature-card h3{font-size:16px!important}
+  .feature-card p{font-size:11px!important}
+  #manariClassicAdmin{right:max(10px,env(safe-area-inset-right))!important;bottom:max(12px,env(safe-area-inset-bottom))!important}
+}
+@media(min-width:901px) and (max-width:1200px){
+  .home-feature-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .hero{grid-template-columns:1fr!important}
+  .hero-visual{min-height:430px!important}
+}
