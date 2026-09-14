@@ -1,6 +1,6 @@
-const CACHE='manari-v5-7-no-old-home-image-flash';
-const VERSION='5.7';
-const CORE=['./','index.html','styles.css','classic-responsive.css','app.js','config.js','laws.js','sidebar-menu.js','nav-fix.js','portal-internal.css','portal-auth.css','portal-cms.css','portal-editor.css','transparency-center.css','portal-internal.js','portal-auth.js','portal-cms.js','portal-cms-bridge.js','portal-editor.js','portal-image-lock.js','transparency-center.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
+const CACHE='manari-v5-8-municipio-online-integrated';
+const VERSION='5.8';
+const CORE=['./','index.html','styles.css','classic-responsive.css','app.js','config.js','laws.js','sidebar-menu.js','nav-fix.js','portal-internal.css','portal-auth.css','portal-cms.css','portal-editor.css','transparency-center.css','portal-internal.js','portal-auth.js','portal-cms.js','portal-cms-bridge.js','portal-editor.js','portal-image-lock.js','municipio-online-integration.js','transparency-center.js','manifest.webmanifest','app-icon-192.png','app-icon-512.png','manari-educacao-conferencia.png'];
 const SUPABASE_CDN='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
