@@ -1,0 +1,11 @@
+(()=>{
+if(window.__MANARI_DEMAND_SHARE__)return;window.__MANARI_DEMAND_SHARE__=true;
+const fmtDate=v=>{if(!v)return'Sem data';const [y,m,d]=String(v).split('-');return d&&m&&y?`${d}/${m}/${y}`:v};
+const fmtTime=v=>v?String(v).slice(0,5):'Não informado';
+const clean=v=>String(v??'').trim();
+function people(id){const rows=(window.state?.assignees||[]).filter(a=>a.demand_id===id);return rows.map(a=>{const p=(window.state?.profiles||[]).find(x=>x.id===a.user_id);return p?.full_name||p?.email||'Responsável'}).join(', ')||'Não definidos';}
+function text(x){return `*PREFEITURA MUNICIPAL DE MANARI*\n*Comunicação e Marketing — Ficha de Demanda*\n\n*${clean(x.title)||'Demanda'}*\n\n📅 Data: ${fmtDate(x.date||x.demand_date)}\n🕐 Horário: ${fmtTime(x.time||x.demand_time)}\n📍 Local: ${clean(x.location)||'Não informado'}\n🏛️ Secretaria: ${clean(x.secretariat)||'Prefeitura Municipal'}\n🎯 Cobertura/Serviço: ${clean(x.coverage)||'Não informado'}\n⚠️ Prioridade: ${clean(x.priority)||'Normal'}\n👥 Responsáveis: ${people(x.id)}\n\n*Orientações / descrição:*\n${clean(x.details)||'Sem observações.'}\n\n_Esta demanda está registrada no Manari Comunicação — Gestão de Demandas._`;}
+async function share(x){const t=text(x);try{if(navigator.share){await navigator.share({title:`Demanda — ${x.title||'Manari'}`,text:t});return}}catch(e){if(e?.name==='AbortError')return}try{await navigator.clipboard.writeText(t);window.toast?.('Ficha copiada. Agora é só enviar no WhatsApp.')}catch(_){window.prompt('Copie a ficha da demanda:',t)}}
+function install(){document.querySelectorAll('.td-bg').forEach(bg=>{if(bg.querySelector('[data-share-demand]'))return;const title=bg.querySelector('.td-head h2')?.textContent?.trim();const x=(window.state?.demands||[]).find(d=>d.title===title);if(!x)return;const head=bg.querySelector('.td-head');const close=head?.querySelector('.td-close');if(!head||!close)return;const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;align-items:center;margin-left:auto';const b=document.createElement('button');b.type='button';b.className='primary';b.dataset.shareDemand='1';b.textContent='↗ Enviar para a equipe';b.onclick=()=>share(x);actions.appendChild(b);head.insertBefore(actions,close);});}
+new MutationObserver(install).observe(document.body,{childList:true,subtree:true});install();
+})();
