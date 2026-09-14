@@ -1,0 +1,12 @@
+(()=>{
+if(window.__MANARI_TEAM_ACCOUNT_ADMIN__)return;window.__MANARI_TEAM_ACCOUNT_ADMIN__=true;
+function enhance(){const f=document.getElementById('inviteTeamForm');if(!f||f.dataset.accountAdmin)return;f.dataset.accountAdmin='1';const grid=f.querySelector('.form-grid');if(!grid)return;
+const email=grid.querySelector('input[name="email"]')?.closest('label');
+const user=document.createElement('label');user.innerHTML='Usuário<input name="username" autocomplete="off" placeholder="Ex.: maxsuel">';
+const pass=document.createElement('label');pass.innerHTML='Senha<input name="password" type="password" minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres" required>';
+if(email){email.after(user);user.after(pass)}else{grid.prepend(user,pass)}
+const btn=f.querySelector('button[type="submit"],button.primary');if(btn)btn.textContent='Criar usuário da equipe';
+const note=f.querySelector('.form-note');if(note)note.textContent='Você cria o acesso completo. Depois, envie o aplicativo e informe ao integrante o e-mail de login e a senha definidos aqui.';
+f.onsubmit=async e=>{e.preventDefault();if(typeof isAdmin==='function'&&!isAdmin())return;const fd=new FormData(f);const body={action:'create',full_name:String(fd.get('full_name')||'').trim(),username:String(fd.get('username')||'').trim(),email:String(fd.get('email')||'').trim(),password:String(fd.get('password')||''),permissions:{can_create:fd.get('can_create')==='on',can_edit:fd.get('can_edit')==='on',can_publish:fd.get('can_publish')==='on',can_analytics:fd.get('can_analytics')==='on'}};if(body.password.length<6){window.toast?.('A senha precisa ter pelo menos 6 caracteres');return}if(btn){btn.disabled=true;btn.textContent='Criando...'}try{const {data,error}=await db.functions.invoke('invite-comms-member',{body});if(error||data?.error){window.toast?.(data?.error||error?.message||'Não foi possível criar o usuário');return}window.toast?.('Usuário criado. Já pode entrar no aplicativo.');f.reset();const edit=f.querySelector('input[name="can_edit"]');if(edit)edit.checked=true;await refresh()}finally{if(btn){btn.disabled=false;btn.textContent='Criar usuário da equipe'}}};}
+new MutationObserver(enhance).observe(document.body,{childList:true,subtree:true});enhance();
+})();
