@@ -1,4 +1,4 @@
-const CACHE='manari-gestao-demandas-v3';
+const CACHE='manari-gestao-demandas-v4-status4';
 const CORE=['./','index.html','styles.css','app.js','calendar-addon.js','trello-board-addon.js','trello-card-detail-addon.js','manifest.webmanifest','../app-icon-192.png','../app-icon-512.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('manari-gestao-demandas-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
