@@ -1,4 +1,4 @@
-// Prefeitura de Manari — CMS Setorial estruturado V4
+// Prefeitura de Manari — CMS Setorial responsivo V5
 (() => {
   if (window.ManariSectorCMS) return;
   const CFG = window.MANARI_CONFIG || {};
@@ -44,11 +44,11 @@
   function ensure(){
     if(document.querySelector('.mpcms-overlay'))return;
     const el=document.createElement('div');el.className='mpcms-overlay';
-    el.innerHTML=`<section class="mpcms-shell" role="dialog" aria-modal="true" aria-label="Sistema de Gestão do Portal"><aside class="mpcms-side"><div class="mpcms-brand"><img src="app-icon-192.png" alt=""><div><b>MANARI</b><span>Gestão do Portal</span></div></div><div class="mpcms-user"></div><nav class="mpcms-modules"></nav><button class="mpcms-exit" type="button">Sair do painel</button></aside><main class="mpcms-main"><header class="mpcms-top"><button class="mpcms-mobile-menu" type="button">☰</button><div><h1>Sistema de Gestão do Portal</h1><p></p></div><button class="mpcms-close" type="button" aria-label="Fechar">×</button></header><div class="mpcms-view"></div></main></section>`;
+    el.innerHTML=`<section class="mpcms-shell" role="dialog" aria-modal="true" aria-label="Sistema de Gestão do Portal"><aside class="mpcms-side"><div class="mpcms-brand"><img src="app-icon-192.png" alt=""><div><b>MANARI</b><span>Gestão do Portal</span></div></div><div class="mpcms-user"></div><nav class="mpcms-modules"></nav><button class="mpcms-exit" type="button">Sair do painel</button></aside><main class="mpcms-main"><header class="mpcms-top"><button class="mpcms-mobile-menu" type="button" aria-label="Abrir menu">☰</button><div><h1>Sistema de Gestão do Portal</h1><p></p></div><button class="mpcms-close" type="button" aria-label="Fechar">×</button></header><div class="mpcms-view"></div></main></section>`;
     document.body.appendChild(el);
     el.querySelector('.mpcms-close').addEventListener('click',close);
     el.querySelector('.mpcms-exit').addEventListener('click',close);
-    el.querySelector('.mpcms-mobile-menu').addEventListener('click',()=>el.querySelector('.mpcms-side').classList.toggle('open'));
+    el.querySelector('.mpcms-mobile-menu').addEventListener('click',()=>el.querySelector('.mpcms-side').classList.toggle('open')); el.addEventListener('click',e=>{if(innerWidth<=900&&el.querySelector('.mpcms-side.open')&&!e.target.closest('.mpcms-side')&&!e.target.closest('.mpcms-mobile-menu'))el.querySelector('.mpcms-side').classList.remove('open')});
   }
   function close(){document.querySelector('.mpcms-overlay')?.classList.remove('open');document.body.style.overflow='';}
   async function open(module){
@@ -78,6 +78,7 @@
     try{await loadRecords(module);renderModule(schema);}catch(e){view.innerHTML=`<div class="mpcms-empty"><strong>Não foi possível carregar.</strong><span>${esc(e.message||'Erro de conexão')}</span></div>`;}
   }
   function statusLabel(s){return s==='published'?'Publicado':s==='archived'?'Arquivado':'Rascunho';}
+  function roleCanPublish(){return ['admin','manager'].includes(staff?.role)}
   function renderModule(schema){
     const published=records.filter(r=>r.status==='published').length,draft=records.filter(r=>r.status==='draft').length,archived=records.filter(r=>r.status==='archived').length;
     const view=document.querySelector('.mpcms-view');
@@ -111,7 +112,7 @@
   }
   function renderForm(schema,record){
     const view=document.querySelector('.mpcms-view'),data=record?.data||{};
-    view.innerHTML=`<div class="mpcms-form-page"><button class="mpcms-back" type="button">← Voltar para ${esc(schema.title)}</button><div class="mpcms-form-card"><div class="mpcms-form-title"><div><span class="mpcms-kicker">${record?'EDITAR REGISTRO':'NOVO REGISTRO'}</span><h2>${record?'Editar':'Cadastrar'} ${esc(schema.title)}</h2><p>Preencha os campos oficiais abaixo. Você pode salvar como rascunho antes de publicar.</p></div></div><form id="mpcmsForm"><section><h3>Identificação</h3><div class="mpcms-grid2"><label>Título do registro<input name="_title" value="${esc(record?.title||'')}" required></label><label>Resumo curto<input name="_summary" value="${esc(record?.summary||'')}"></label></div></section><section><h3>Informações do módulo</h3><div class="mpcms-grid2">${(schema.fields||[]).map(f=>inputFor(f,data[f.key])).join('')}</div></section><section><h3>Documento / comprovante</h3><div class="mpcms-grid2"><label>Arquivo oficial<input type="file" name="_file" accept="application/pdf,image/jpeg,image/png,image/webp"></label><label>Fonte externa obrigatória, se houver<input type="url" name="_source_url" value="${esc(record?.source_url||'')}" placeholder="Somente quando tecnicamente obrigatório"></label></div>${record?.file_url?`<div class="mpcms-current-file">Arquivo atual: <a href="${esc(record.file_url)}" target="_blank" rel="noopener">visualizar</a></div>`:''}</section><div class="mpcms-form-actions"><button class="mpcms-secondary" type="submit" data-save="draft">Salvar rascunho</button><button class="mpcms-primary" type="submit" data-save="published">Salvar e publicar</button>${record?'<button class="mpcms-danger" type="button" data-archive-form>Arquivar</button>':''}</div><div class="mpcms-form-status"></div></form></div></div>`;
+    view.innerHTML=`<div class="mpcms-form-page"><button class="mpcms-back" type="button">← Voltar para ${esc(schema.title)}</button><div class="mpcms-form-card"><div class="mpcms-form-title"><div><span class="mpcms-kicker">${record?'EDITAR REGISTRO':'NOVO REGISTRO'}</span><h2>${record?'Editar':'Cadastrar'} ${esc(schema.title)}</h2><p>Preencha os campos oficiais abaixo. Você pode salvar como rascunho antes de publicar.</p></div></div><form id="mpcmsForm"><section><h3>Identificação</h3><div class="mpcms-grid2"><label>Título do registro<input name="_title" value="${esc(record?.title||'')}" required></label><label>Resumo curto<input name="_summary" value="${esc(record?.summary||'')}"></label></div></section><section><h3>Informações do módulo</h3><div class="mpcms-grid2">${(schema.fields||[]).map(f=>inputFor(f,data[f.key])).join('')}</div></section><section><h3>Documento / comprovante</h3><div class="mpcms-grid2"><label>Arquivo oficial<input type="file" name="_file" accept="application/pdf,image/jpeg,image/png,image/webp"></label><label>Fonte externa obrigatória, se houver<input type="url" name="_source_url" value="${esc(record?.source_url||'')}" placeholder="Somente quando tecnicamente obrigatório"></label></div>${record?.file_url?`<div class="mpcms-current-file">Arquivo atual: <a href="${esc(record.file_url)}" target="_blank" rel="noopener">visualizar</a></div>`:''}</section><div class="mpcms-form-actions"><button class="mpcms-secondary" type="submit" data-save="draft">Salvar rascunho</button>${roleCanPublish()?'<button class="mpcms-primary" type="submit" data-save="published">Salvar e publicar</button>':'<button class="mpcms-primary" type="submit" data-save="draft">Enviar para revisão</button>'}${record?'<button class="mpcms-danger" type="button" data-archive-form>Arquivar</button>':''}</div><div class="mpcms-form-status"></div></form></div></div>`;
     view.querySelector('.mpcms-back').addEventListener('click',()=>openModule(schema.module));
     let desiredStatus=record?.status||'draft';
     view.querySelectorAll('[data-save]').forEach(b=>b.addEventListener('click',()=>desiredStatus=b.dataset.save));
