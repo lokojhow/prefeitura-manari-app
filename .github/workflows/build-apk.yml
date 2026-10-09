@@ -35,6 +35,9 @@ jobs:
           cache: gradle
       - name: Preparar Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
       - name: Instalar Android 36
         run: |
           yes | sdkmanager --licenses >/dev/null || true
