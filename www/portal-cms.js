@@ -27,9 +27,10 @@
   }
   function allowed(module){
     if(!staff)return false;
-    if(['admin','manager'].includes(staff.role))return true;
+    if(staff.role==='admin')return true;
+    if(!staff.can_manage_documents)return false;
     const mods=staff.modules||[];
-    return !mods.length||mods.includes(module);
+    return mods.includes(module);
   }
   async function loadSchemas(){
     const c=await getClient();
@@ -39,7 +40,7 @@
   async function loadRecords(module){
     const c=await getClient();
     const {data,error}=await c.from('portal_records').select('*').eq('module',module).order('updated_at',{ascending:false});
-    if(error)throw error; records=data||[];
+    if(error)throw error; records=(data||[]).filter(r=>staff.role==='admin'||r.department===staff.department);
   }
   function ensure(){
     if(document.querySelector('.mpcms-overlay'))return;
@@ -64,7 +65,7 @@
   function renderNoAccess(){document.querySelector('.mpcms-view').innerHTML='<div class="mpcms-empty"><strong>Nenhum módulo autorizado.</strong><span>Peça ao administrador para liberar o setor correto para este usuário.</span></div>';}
   function renderSidebar(){
     const user=document.querySelector('.mpcms-user');
-    user.innerHTML=`<strong>${esc(staff.full_name||staff.email||'Responsável')}</strong><span>${esc(staff.department||'Prefeitura de Manari')}</span><small>${esc(staff.role==='admin'?'Administrador geral':staff.role==='manager'?'Gerente':'Responsável do setor')}</small>`;
+    user.innerHTML=`<strong>${esc(staff.full_name||staff.email||'Responsável')}</strong><span>${esc(staff.department||'Prefeitura de Manari')}</span><small>${esc(staff.role==='admin'?'Administrador geral':staff.role==='manager'?'Secretário':'Supervisor')}</small>`;
     const nav=document.querySelector('.mpcms-modules');
     nav.innerHTML=schemas.map(s=>`<button type="button" data-cms-module="${esc(s.module)}"><span>▦</span><div><b>${esc(s.title)}</b><small>${esc(s.description||'')}</small></div></button>`).join('');
     nav.querySelectorAll('[data-cms-module]').forEach(b=>b.addEventListener('click',()=>openModule(b.dataset.cmsModule)));
@@ -93,7 +94,7 @@
     const q=norm(view.querySelector('[data-search]')?.value),st=view.querySelector('[data-status]')?.value||'';
     const rows=records.filter(r=>(!st||r.status===st)&&(!q||norm([r.title,r.summary,JSON.stringify(r.data)].join(' ')).includes(q)));
     const tbody=view.querySelector('tbody'),empty=view.querySelector('.mpcms-empty-table');
-    tbody.innerHTML=rows.map(r=>`<tr><td><b>${esc(r.title)}</b><small>${esc(r.summary||'Sem resumo')}</small></td><td>${esc(new Date(r.updated_at).toLocaleDateString('pt-BR'))}</td><td><span class="mpcms-status ${esc(r.status)}">${statusLabel(r.status)}</span></td><td><div class="mpcms-row-actions"><button data-view="${r.id}" title="Visualizar">◉</button><button data-edit="${r.id}" title="Editar">✎</button>${r.status!=='published'?`<button data-publish="${r.id}" title="Publicar">✓</button>`:''}${r.status!=='archived'?`<button data-archive="${r.id}" title="Arquivar">⌑</button>`:''}</div></td></tr>`).join('');
+    tbody.innerHTML=rows.map(r=>`<tr><td><b>${esc(r.title)}</b><small>${esc(r.summary||'Sem resumo')}</small></td><td>${esc(new Date(r.updated_at).toLocaleDateString('pt-BR'))}</td><td><span class="mpcms-status ${esc(r.status)}">${statusLabel(r.status)}</span></td><td><div class="mpcms-row-actions"><button data-view="${r.id}" title="Visualizar">◉</button>${(roleCanPublish()||r.status==='draft')?`<button data-edit="${r.id}" title="Editar">✎</button>`:''}${roleCanPublish()&&r.status!=='published'?`<button data-publish="${r.id}" title="Publicar">✓</button>`:''}${roleCanPublish()&&r.status!=='archived'?`<button data-archive="${r.id}" title="Arquivar">⌑</button>`:''}</div></td></tr>`).join('');
     empty.innerHTML=rows.length?'':'<div class="mpcms-empty"><strong>Nenhum registro encontrado.</strong><span>Use “Adicionar novo” para cadastrar a primeira informação deste módulo.</span></div>';
     tbody.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>renderForm(schema,records.find(r=>r.id===b.dataset.edit))));
     tbody.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>renderPreview(schema,records.find(r=>r.id===b.dataset.view))));
@@ -101,7 +102,8 @@
     tbody.querySelectorAll('[data-archive]').forEach(b=>b.addEventListener('click',()=>changeStatus(b.dataset.archive,'archived')));
   }
   async function changeStatus(id,status){
-    const c=await getClient();const {error}=await c.from('portal_records').update({status}).eq('id',id);if(error){alert(error.message);return;}await openModule(activeModule);
+    if(!roleCanPublish())return;
+    const c=await getClient();const {data,error}=await c.from('portal_records').update({status}).eq('id',id).select('id');if(error||!data?.length){alert(error?.message||'Registro não alterado: verifique sua permissão.');return;}await openModule(activeModule);
   }
   function inputFor(field,value){
     const v=value??''; const req=field.required?' required':''; const key=esc(field.key),label=esc(field.label||field.key);
@@ -112,11 +114,11 @@
   }
   function renderForm(schema,record){
     const view=document.querySelector('.mpcms-view'),data=record?.data||{};
-    view.innerHTML=`<div class="mpcms-form-page"><button class="mpcms-back" type="button">← Voltar para ${esc(schema.title)}</button><div class="mpcms-form-card"><div class="mpcms-form-title"><div><span class="mpcms-kicker">${record?'EDITAR REGISTRO':'NOVO REGISTRO'}</span><h2>${record?'Editar':'Cadastrar'} ${esc(schema.title)}</h2><p>Preencha os campos oficiais abaixo. Você pode salvar como rascunho antes de publicar.</p></div></div><form id="mpcmsForm"><section><h3>Identificação</h3><div class="mpcms-grid2"><label>Título do registro<input name="_title" value="${esc(record?.title||'')}" required></label><label>Resumo curto<input name="_summary" value="${esc(record?.summary||'')}"></label></div></section><section><h3>Informações do módulo</h3><div class="mpcms-grid2">${(schema.fields||[]).map(f=>inputFor(f,data[f.key])).join('')}</div></section><section><h3>Documento / comprovante</h3><div class="mpcms-grid2"><label>Arquivo oficial<input type="file" name="_file" accept="application/pdf,image/jpeg,image/png,image/webp"></label><label>Fonte externa obrigatória, se houver<input type="url" name="_source_url" value="${esc(record?.source_url||'')}" placeholder="Somente quando tecnicamente obrigatório"></label></div>${record?.file_url?`<div class="mpcms-current-file">Arquivo atual: <a href="${esc(record.file_url)}" target="_blank" rel="noopener">visualizar</a></div>`:''}</section><div class="mpcms-form-actions"><button class="mpcms-secondary" type="submit" data-save="draft">Salvar rascunho</button>${roleCanPublish()?'<button class="mpcms-primary" type="submit" data-save="published">Salvar e publicar</button>':'<button class="mpcms-primary" type="submit" data-save="draft">Enviar para revisão</button>'}${record?'<button class="mpcms-danger" type="button" data-archive-form>Arquivar</button>':''}</div><div class="mpcms-form-status"></div></form></div></div>`;
+    view.innerHTML=`<div class="mpcms-form-page"><button class="mpcms-back" type="button">← Voltar para ${esc(schema.title)}</button><div class="mpcms-form-card"><div class="mpcms-form-title"><div><span class="mpcms-kicker">${record?'EDITAR REGISTRO':'NOVO REGISTRO'}</span><h2>${record?'Editar':'Cadastrar'} ${esc(schema.title)}</h2><p>Preencha os campos oficiais abaixo. Você pode salvar como rascunho antes de publicar.</p></div></div><form id="mpcmsForm"><section><h3>Identificação</h3><div class="mpcms-grid2"><label>Título do registro<input name="_title" value="${esc(record?.title||'')}" required></label><label>Resumo curto<input name="_summary" value="${esc(record?.summary||'')}"></label></div></section><section><h3>Informações do módulo</h3><div class="mpcms-grid2">${(schema.fields||[]).map(f=>inputFor(f,data[f.key])).join('')}</div></section><section><h3>Documento / comprovante</h3><div class="mpcms-grid2"><label>Arquivo oficial<input type="file" name="_file" accept="application/pdf,image/jpeg,image/png,image/webp"></label><label>Fonte externa obrigatória, se houver<input type="url" name="_source_url" value="${esc(record?.source_url||'')}" placeholder="Somente quando tecnicamente obrigatório"></label></div>${record?.file_url?`<div class="mpcms-current-file">Arquivo atual: <a href="${esc(record.file_url)}" target="_blank" rel="noopener">visualizar</a></div>`:''}</section><div class="mpcms-form-actions"><button class="mpcms-secondary" type="submit" data-save="draft">Salvar rascunho</button>${roleCanPublish()?'<button class="mpcms-primary" type="submit" data-save="published">Salvar e publicar</button>':'<button class="mpcms-primary" type="submit" data-save="draft">Enviar para revisão</button>'}${record&&roleCanPublish()?'<button class="mpcms-danger" type="button" data-archive-form>Arquivar</button>':''}</div><div class="mpcms-form-status"></div></form></div></div>`;
     view.querySelector('.mpcms-back').addEventListener('click',()=>openModule(schema.module));
-    let desiredStatus=record?.status||'draft';
+    let desiredStatus='draft';
     view.querySelectorAll('[data-save]').forEach(b=>b.addEventListener('click',()=>desiredStatus=b.dataset.save));
-    view.querySelector('#mpcmsForm').addEventListener('submit',e=>saveRecord(e,schema,record,desiredStatus));
+    view.querySelector('#mpcmsForm').addEventListener('submit',e=>saveRecord(e,schema,record,e.submitter?.dataset.save||desiredStatus));
     view.querySelector('[data-archive-form]')?.addEventListener('click',()=>changeStatus(record.id,'archived'));
   }
   async function uploadFile(file,module){
@@ -130,17 +132,17 @@
     try{
       const fd=new FormData(form),payloadData={};(schema.fields||[]).forEach(f=>{let v=fd.get(f.key);if(f.type==='number'||f.type==='currency'){v=v===''?null:Number(v)}payloadData[f.key]=v;});
       const file=fd.get('_file');const uploaded=await uploadFile(file,schema.module);
-      const payload={module:schema.module,department:staff.department||schema.department_code||null,title:String(fd.get('_title')||'').trim(),summary:String(fd.get('_summary')||'').trim()||null,status,data:payloadData,source_url:String(fd.get('_source_url')||'').trim()||null};
+      const payload={module:schema.module,department:record?.department||staff.department||schema.department_code||null,title:String(fd.get('_title')||'').trim(),summary:String(fd.get('_summary')||'').trim()||null,status:roleCanPublish()?status:'draft',data:payloadData,source_url:String(fd.get('_source_url')||'').trim()||null};
       if(uploaded)payload.file_url=uploaded; else if(record?.file_url)payload.file_url=record.file_url;
       const c=await getClient();let error;
-      if(record)({error}=await c.from('portal_records').update(payload).eq('id',record.id));else({error}=await c.from('portal_records').insert(payload));
+      if(record)({error}=await c.from('portal_records').update(payload).eq('id',record.id).select('id').single());else({error}=await c.from('portal_records').insert(payload));
       if(error)throw error;st.textContent=status==='published'?'Publicado com sucesso.':'Rascunho salvo.';setTimeout(()=>openModule(schema.module),500);
     }catch(err){st.textContent='Não foi possível salvar: '+(err.message||'erro inesperado');}
   }
   function renderPreview(schema,record){
     const view=document.querySelector('.mpcms-view');
-    view.innerHTML=`<div class="mpcms-form-page"><button class="mpcms-back" type="button">← Voltar</button><article class="mpcms-preview"><div class="mpcms-preview-head"><div><span class="mpcms-status ${esc(record.status)}">${statusLabel(record.status)}</span><h2>${esc(record.title)}</h2><p>${esc(record.summary||'')}</p></div><button class="mpcms-primary" data-edit-now>Editar</button></div><dl>${(schema.fields||[]).map(f=>`<div><dt>${esc(f.label||f.key)}</dt><dd>${esc(record.data?.[f.key]??'—')}</dd></div>`).join('')}</dl>${record.file_url?`<a class="mpcms-primary link" href="${esc(record.file_url)}" target="_blank" rel="noopener">Abrir documento</a>`:''}</article></div>`;
-    view.querySelector('.mpcms-back').addEventListener('click',()=>openModule(schema.module));view.querySelector('[data-edit-now]').addEventListener('click',()=>renderForm(schema,record));
+    view.innerHTML=`<div class="mpcms-form-page"><button class="mpcms-back" type="button">← Voltar</button><article class="mpcms-preview"><div class="mpcms-preview-head"><div><span class="mpcms-status ${esc(record.status)}">${statusLabel(record.status)}</span><h2>${esc(record.title)}</h2><p>${esc(record.summary||'')}</p></div>${(roleCanPublish()||record.status==='draft')?'<button class="mpcms-primary" data-edit-now>Editar</button>':''}</div><dl>${(schema.fields||[]).map(f=>`<div><dt>${esc(f.label||f.key)}</dt><dd>${esc(record.data?.[f.key]??'—')}</dd></div>`).join('')}</dl>${record.file_url?`<a class="mpcms-primary link" href="${esc(record.file_url)}" target="_blank" rel="noopener">Abrir documento</a>`:''}</article></div>`;
+    view.querySelector('.mpcms-back').addEventListener('click',()=>openModule(schema.module));view.querySelector('[data-edit-now]')?.addEventListener('click',()=>renderForm(schema,record));
   }
 
   window.ManariSectorCMS={open,close};

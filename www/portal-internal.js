@@ -25,7 +25,7 @@
     const {data}=await c.from('portal_staff_members').select('*').eq('user_id',session.user.id).eq('active',true).maybeSingle();
     staff=data||false;return staff;
   }
-  function canManage(module){if(!staff||!staff.can_manage_documents)return false;return ['admin','manager'].includes(staff.role)||(staff.modules||[]).length===0||(staff.modules||[]).includes(module)}
+  function canManage(module){if(!staff||!staff.can_manage_documents)return false;return staff.role==='admin'||(staff.role==='manager'&&(staff.modules||[]).includes(module))}
   async function restDocs(module){try{const r=await fetch(`${CFG.supabaseUrl}/rest/v1/portal_documents?select=*&module=eq.${encodeURIComponent(module)}&active=eq.true&order=published_at.desc`,{headers:{apikey:CFG.supabaseAnonKey,Authorization:`Bearer ${CFG.supabaseAnonKey}`},cache:'no-store'});return r.ok?await r.json():[]}catch{return []}}
   async function loadDocs(module){const c=await getClient();if(c){const {data}=await c.from('portal_documents').select('*').eq('module',module).eq('active',true).order('published_at',{ascending:false});return data||[]}return restDocs(module)}
 
