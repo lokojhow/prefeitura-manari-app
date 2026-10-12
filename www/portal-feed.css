@@ -3,3 +3,5 @@
 #manariClassicAdmin{z-index:111!important}
 
 body.manari-sector-rail-active.manari-feed-home{padding-left:0!important}
+
+#manariNewsEntryImage{object-fit:cover;object-position:center}#manariNewsEntry{cursor:pointer}#manariNewsEntry .mf-primary{background:#087b46;color:white;padding:11px 18px;border-radius:24px}#manariNewsEntry button:hover{background:#075b35}
