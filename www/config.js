@@ -1,4 +1,5 @@
 window.MANARI_CONFIG = {
+  authRedirectUrl: "https://lokojhow.github.io/prefeitura-manari-app/www/index.html",
   // Projeto Supabase oficial do aplicativo Prefeitura de Manari.
   // A Publishable Key é própria para uso no frontend, protegida pelas políticas RLS do projeto.
   supabaseUrl: "https://dxvqiiawthxwkypvsxci.supabase.co",
