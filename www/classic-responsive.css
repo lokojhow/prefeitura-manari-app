@@ -47,3 +47,8 @@ body{padding-top:env(safe-area-inset-top);padding-right:env(safe-area-inset-righ
   .hero{grid-template-columns:1fr!important}
   .hero-visual{min-height:430px!important}
 }
+
+/* O texto nunca pode avançar sobre a fotografia. */
+.hero>*,.hero-copy{min-width:0}
+.hero-copy h1{max-width:100%;overflow-wrap:anywhere;word-break:normal;line-height:1.08!important}
+.hero-copy h1 .manari-title-keyword{background:linear-gradient(transparent 83%,#b9d9be 83%,#b9d9be 96%,transparent 96%);box-decoration-break:clone;-webkit-box-decoration-break:clone}
