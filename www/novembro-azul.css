@@ -1,19 +1,19 @@
 /* Tema sazonal: somente superfícies públicas, sem alterar a logomarca. */
-body.manari-novembro-azul{background:#f3f8fd}
-.manari-novembro-azul .topbar{background:#fff;border-bottom:3px solid #2479bd;box-shadow:0 4px 24px #1264a412}
-.manari-novembro-azul .main-view{background:linear-gradient(145deg,#f7fbff,#eef5fc)}
-.novembro-azul-banner{display:flex;align-items:center;gap:22px;position:relative;isolation:isolate;overflow:hidden;margin:4px 0 24px;padding:26px 32px;border-radius:24px;background:linear-gradient(115deg,#073866,#126eb1 68%,#248bc5);color:#fff;box-shadow:0 10px 28px #0a497122}
-.novembro-azul-banner:after{content:"";position:absolute;z-index:-1;right:-45px;top:-90px;width:300px;height:300px;border:42px solid #ffffff09;border-radius:50%;pointer-events:none}
-.novembro-azul-ribbon{width:64px;height:80px;flex:0 0 64px;color:#9bd9ff;filter:drop-shadow(0 4px 8px #002c5040)}
-.novembro-azul-eyebrow{display:block;font:700 10px/1.5 Montserrat,sans-serif;letter-spacing:.1em;color:#c3e7ff}
-.novembro-azul-banner h2{margin:5px 0 7px!important;font:700 clamp(26px,3.2vw,40px)/1.1 Montserrat,sans-serif!important;letter-spacing:-.035em;color:#fff!important}
-.novembro-azul-banner h2 strong{color:#a9e0ff}
-.novembro-azul-banner p{margin:0 0 7px;font-size:16px;line-height:1.4;color:#fff}
-.novembro-azul-note{font-size:12px;line-height:1.4;color:#c9e5fa}
-.manari-novembro-azul .hero-copy h1 .green{color:#176ca8!important}
-.manari-novembro-azul .hero-copy h1 .manari-title-keyword{background:linear-gradient(transparent 83%,#b4daf3 83%,#b4daf3 96%,transparent 96%)}
-.manari-novembro-azul .hero-copy button,.manari-novembro-azul #openServices,.manari-novembro-azul #manariClassicAdmin{background:linear-gradient(110deg,#09538c,#167dbb)!important;box-shadow:0 7px 20px #1369a226!important;color:#fff!important}
-.manari-novembro-azul .quick-value,.manari-novembro-azul .quick-value strong{color:#125f9b}
-.manari-novembro-azul .feature-card{border-color:#d8e7f4}
-.manari-novembro-azul #mfBottom{border-top:2px solid #d7e9f7!important}
-@media(max-width:600px){.novembro-azul-banner{padding:19px 14px;gap:12px;border-radius:18px;margin:4px 0 14px}.novembro-azul-ribbon{width:38px;height:55px;flex-basis:38px}.novembro-azul-eyebrow{font-size:8px;letter-spacing:.04em}.novembro-azul-banner h2{font-size:25px!important}.novembro-azul-banner p{font-size:13px}.novembro-azul-note{font-size:10px}}
+body.manari-outubro-rosa{background:#fff5f9}
+.manari-outubro-rosa .topbar{background:#fff;border-bottom:3px solid #d23c82;box-shadow:0 4px 24px #b71b6212}
+.manari-outubro-rosa .main-view{background:linear-gradient(145deg,#fff9fc,#fcecf4)}
+.outubro-rosa-banner{display:flex;align-items:center;gap:22px;position:relative;isolation:isolate;overflow:hidden;margin:4px 0 24px;padding:26px 32px;border-radius:24px;background:linear-gradient(115deg,#711744,#b82970 68%,#d74e94);color:#fff;box-shadow:0 10px 28px #8d245422}
+.outubro-rosa-banner:after{content:"";position:absolute;z-index:-1;right:-45px;top:-90px;width:300px;height:300px;border:42px solid #ffffff09;border-radius:50%;pointer-events:none}
+.outubro-rosa-ribbon{width:64px;height:80px;flex:0 0 64px;color:#ffd1e6;filter:drop-shadow(0 4px 8px #57102e40)}
+.outubro-rosa-eyebrow{display:block;font:700 10px/1.5 Montserrat,sans-serif;letter-spacing:.1em;color:#ffe0ed}
+.outubro-rosa-banner h2{margin:5px 0 7px!important;font:700 clamp(26px,3.2vw,40px)/1.1 Montserrat,sans-serif!important;letter-spacing:-.035em;color:#fff!important}
+.outubro-rosa-banner h2 strong{color:#ffd1e6}
+.outubro-rosa-banner p{margin:0 0 7px;font-size:16px;line-height:1.4;color:#fff}
+.outubro-rosa-note{font-size:12px;line-height:1.4;color:#ffe0ed}
+.manari-outubro-rosa .hero-copy h1 .green{color:#b32b70!important}
+.manari-outubro-rosa .hero-copy h1 .manari-title-keyword{background:linear-gradient(transparent 83%,#f5bfd8 83%,#f5bfd8 96%,transparent 96%)}
+.manari-outubro-rosa .hero-copy button,.manari-outubro-rosa #openServices,.manari-outubro-rosa #manariClassicAdmin{background:linear-gradient(110deg,#962158,#c7377d)!important;box-shadow:0 7px 20px #a6226126!important;color:#fff!important}
+.manari-outubro-rosa .quick-value,.manari-outubro-rosa .quick-value strong{color:#9d245e}
+.manari-outubro-rosa .feature-card{border-color:#f0d5e2}
+.manari-outubro-rosa #mfBottom{border-top:2px solid #f0d5e2!important}
+@media(max-width:600px){.outubro-rosa-banner{padding:19px 14px;gap:12px;border-radius:18px;margin:4px 0 14px}.outubro-rosa-ribbon{width:38px;height:55px;flex-basis:38px}.outubro-rosa-eyebrow{font-size:8px;letter-spacing:.04em}.outubro-rosa-banner h2{font-size:25px!important}.outubro-rosa-banner p{font-size:13px}.outubro-rosa-note{font-size:10px}}
