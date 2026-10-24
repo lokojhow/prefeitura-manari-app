@@ -1,0 +1,31 @@
+-- e-SIC Manari: plano de autorização compatível com cadastro atual
+-- NÃO EXECUTAR DIRETAMENTE EM PRODUÇÃO.
+-- Revisão pendente de regressão da ouvidoria, recursos e identidade.
+-- Regra de acesso: administração ou equipe Ouvidoria e LAI com módulo esic.
+-- ATENÇÃO: normalizar department real antes de aplicar; comparar com portal_departments.
+-- Não usar metadata editável do usuário para autorizações.
+--
+-- Esqueleto de política para homologação, propositalmente comentado:
+--
+-- DROP POLICY IF EXISTS citizen_requests_staff_read ON public.citizen_requests;
+-- DROP POLICY IF EXISTS citizen_requests_staff_update ON public.citizen_requests;
+--
+-- CREATE POLICY citizen_requests_staff_read ON public.citizen_requests
+-- FOR SELECT TO authenticated USING (
+--   public.is_portal_admin()
+--   OR EXISTS (
+--     SELECT 1 FROM public.portal_staff_members s
+--     WHERE s.user_id=(select auth.uid())
+--       AND s.active
+--       AND s.department='Ouvidoria e LAI'
+--       AND (
+--         (citizen_requests.request_type='esic' AND 'esic'=ANY(s.modules))
+--         OR (citizen_requests.request_type='ouvidoria' AND 'ouvidoria'=ANY(s.modules))
+--       )
+--   )
+-- );
+--
+-- Todo UPDATE administrativo deverá ser substituído por RPC auditável,
+-- validando setor, módulo, colunas e transição de estado.
+-- A política citizen_requests_own_read do titular não deve ser removida.
+-- A Ouvidoria pode demandar isolamento extra de denúncias e casos sigilosos.
