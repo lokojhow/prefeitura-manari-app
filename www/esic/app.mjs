@@ -143,7 +143,8 @@ export function mountEsic(document,client) {
  });
  $('logout').onclick=()=>void run($('logout'),async()=>{
   ++epoch;clearTimeout(authTimer);clearPrivate();activeUserId=null;recovering=false;show('auth',true);show('recovery',false);
-  const result=await client.auth.signOut({scope:'local'});if(result.error)throw result.error;message('Sessão encerrada neste dispositivo.');
+  const result=await client.auth.signOut({scope:'local'});if(result.error)throw result.error;message('Sessão encerrada. Entre ou crie outra conta abaixo.');
+  $('auth').scrollIntoView({behavior:'smooth',block:'start'});$('login-email').focus({preventScroll:true});
  });
  $('refresh').onclick=()=>void run($('refresh'),async()=>{await refreshMine();message('Protocolos atualizados.');});
  $('queue-refresh').onclick=()=>void run($('queue-refresh'),async()=>{await refreshQueue();message('Fila atualizada.');});
