@@ -1,0 +1,7 @@
+-- Applied to Supabase project Manari conectado on 2026-10-24.
+-- Isolated schema for real requests. Do not remove legacy Ouvidoria tables.
+-- New tables: public.manari_digital_requests and public.manari_digital_events.
+-- RLS: citizen can insert only initial request and read own requests/history.
+-- Administrative write path intentionally not exposed pending staff/RPC authorization review.
+-- This records the implementation for code review, not a re-runnable migration.
+-- Verify directly in Supabase migration history: manari_digital_requests_isolated_rls.

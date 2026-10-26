@@ -1,0 +1,36 @@
+name: Validar protótipos e-SIC
+on:
+  pull_request:
+    paths:
+      - 'prototipos/esic-*.js'
+      - 'prototipos/*.test.mjs'
+      - 'prototipos/package.json'
+      - 'publicacao/**'
+      - 'tests/esic-publicacao.test.mjs'
+      - '.github/workflows/esic-tests.yml'
+  push:
+    branches: ['feature/esic-manari-base']
+    paths:
+      - 'prototipos/esic-*.js'
+      - 'prototipos/*.test.mjs'
+      - 'prototipos/package.json'
+      - 'publicacao/**'
+      - 'tests/esic-publicacao.test.mjs'
+      - '.github/workflows/esic-tests.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: prototipos
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Executar testes de contrato do e-SIC
+        run: npm test
+      - name: Validar aplicação de publicação
+        run: node --test ../tests/esic-publicacao.test.mjs
