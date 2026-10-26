@@ -1,0 +1,20 @@
+name: Validar publicação e-SIC
+on:
+  pull_request:
+    paths: ['www/esic/**', 'tests/esic-publicacao.test.mjs', '.github/workflows/esic-publication.yml']
+  push:
+    branches: ['main', 'release/esic-cloudflare-20261026']
+    paths: ['www/esic/**', 'tests/esic-publicacao.test.mjs', '.github/workflows/esic-publication.yml']
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check www/esic/app.mjs
+      - run: node --test tests/esic-publicacao.test.mjs
+      - run: node tests/email-redirect.cjs
