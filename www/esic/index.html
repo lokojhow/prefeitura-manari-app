@@ -13,6 +13,7 @@
  <a class="skip" href="#conteudo">Pular para o conteúdo</a>
  <header class="topbar"><div class="wrap brand"><span class="brand-mark" aria-hidden="true">M</span><div><strong>PREFEITURA DE MANARI</strong><small>Serviço de Informação ao Cidadão</small></div><span class="test-tag">Homologação</span></div></header>
  <main id="conteudo" class="wrap">
+  <section id="account" class="account card" aria-label="Conta conectada" hidden><div><p>Você está conectado como<br><strong id="identity"></strong></p><small>Para usar outro e-mail, saia desta conta.</small></div><button id="logout" type="button">Sair da conta</button></section>
   <div class="hero"><div><span class="eyebrow">ACESSO À INFORMAÇÃO</span><h1>Informação pública,<br>mais perto de você.</h1><p>Faça seu pedido, acompanhe o protocolo e consulte a resposta em um só lugar. Não é necessário justificar a solicitação.</p></div><div class="hero-symbol" aria-hidden="true">e-SIC<span>MANARI • PE</span></div></div>
   <p class="notice">Ambiente de homologação. Use dados fictícios durante os testes. O atendimento oficial existente permanece disponível.</p>
   <div id="status" class="status" role="status" aria-live="polite">Conectando ao serviço…</div>
@@ -28,7 +29,6 @@
   </section>
 
   <section id="recovery" class="card" hidden><h2>Definir nova senha</h2><form id="new-password"><label for="new-password-input">Nova senha</label><div class="password-field"><input id="new-password-input" type="password" name="password" autocomplete="new-password" minlength="8" maxlength="128" required><button type="button" class="password-toggle" data-password-target="new-password-input" data-password-label="nova senha" aria-controls="new-password-input" aria-pressed="false" aria-label="Mostrar nova senha">Mostrar senha</button></div><button type="submit">Salvar nova senha</button></form></section>
-  <section id="account" class="account" hidden><p>Conta: <strong id="identity"></strong></p><button id="logout" class="secondary" type="button">Sair da conta</button></section>
 
   <section id="compose" class="card" hidden><div class="section-title"><span class="step">02</span><div><h2>Solicite uma informação</h2><p>Descreva com clareza a informação pública que deseja receber.</p></div></div><form id="create"><label for="subject">Assunto</label><input id="subject" name="subject" minlength="5" maxlength="200" required placeholder="Ex.: informações sobre uma obra municipal"><label for="description">Descrição do pedido</label><textarea id="description" name="description" minlength="10" maxlength="10000" rows="6" required placeholder="Informe os detalhes que ajudarão a localizar a informação."></textarea><p class="hint">Evite incluir senhas e dados pessoais desnecessários no texto.</p><button type="submit">Registrar pedido</button></form></section>
 
