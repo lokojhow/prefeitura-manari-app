@@ -1,3 +1,18 @@
+// ESIC_ROUTING_BEGIN
+(() => {
+  if(window.__MANARI_ESIC_ROUTING__)return;
+  window.__MANARI_ESIC_ROUTING__=true;
+  document.addEventListener('click',event=>{
+    const target=event.target.closest('[data-service],[data-service-url],[data-nav="esic"]');
+    if(!target)return;
+    const label=String(target.getAttribute('data-service')||target.querySelector('b')?.textContent||target.textContent||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+    if(target.getAttribute('data-nav')!=='esic'&&!/^(?:e[\s-]?sic|lai\s*\/\s*e[\s-]?sic)(?:$|[\s/])/.test(label))return;
+    event.preventDefault();event.stopImmediatePropagation();
+    window.location.assign(new URL('./esic/',window.location.href).href);
+  },true);
+})();
+// ESIC_ROUTING_END
+
 // Prefeitura de Manari — modo clássico V6.0
 (() => {
   if(window.__MANARI_CLASSIC_BOOTSTRAP__)return;window.__MANARI_CLASSIC_BOOTSTRAP__=true;const VERSION='6.14';
