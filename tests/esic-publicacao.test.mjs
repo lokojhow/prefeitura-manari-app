@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {createEsicApi,friendlyError} from '../www/esic/api.mjs';
+import {createEsicApi,friendlyError,resendSignupConfirmation} from '../www/esic/api.mjs';
 import {setPasswordVisibility} from '../www/esic/app.mjs';
 const UID='76c046c7-78dd-4b73-8d53-c93f4c4da001';
 const RID='76c046c7-78dd-4b73-8d53-c93f4c4da004';
@@ -72,4 +72,15 @@ test('mostrar e ocultar senha preserva o conteúdo e atualiza o estado acessíve
  setPasswordVisibility(input,button,false);
  assert.equal(input.type,'password');assert.equal(input.value,'valor-ficticio-de-teste');
  assert.equal(button.textContent,'Mostrar senha');assert.equal(attributes['aria-pressed'],'false');
+});
+
+test('reenvio solicita confirmação de cadastro com retorno ao e-SIC e propaga falhas de entrega',async()=>{
+ let received;
+ const client={auth:{resend:async payload=>{received=payload;return {error:null};}}};
+ await resendSignupConfirmation(client,' cidadao@example.invalid ','https://app.example/esic/');
+ assert.deepEqual(received,{type:'signup',email:'cidadao@example.invalid',options:{emailRedirectTo:'https://app.example/esic/'}});
+ client.auth.resend=async()=>({error:Error('Email address not authorized')});
+ await assert.rejects(resendSignupConfirmation(client,'cidadao@example.invalid','https://app.example/esic/'),/not authorized/);
+ assert.match(friendlyError({message:'Email not confirmed'}),/Reenviar confirmação/);
+ assert.match(friendlyError({message:'Email address not authorized'}),/atendimento/);
 });

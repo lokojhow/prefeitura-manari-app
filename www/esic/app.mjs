@@ -1,4 +1,4 @@
-import {createEsicApi,STATUS,friendlyError} from './api.mjs';
+import {createEsicApi,STATUS,friendlyError,resendSignupConfirmation} from './api.mjs';
 
 export function setPasswordVisibility(input,button,visible) {
  input.type=visible?'text':'password';
@@ -112,12 +112,25 @@ export function mountEsic(document,client) {
  const redirect=()=>new URL('./',document.location.href).href;
  form('login',async form=>{
   message('Entrando…');const d=value(form),result=await client.auth.signInWithPassword({email:d.email.trim(),password:d.password});
-  if(result.error)throw result.error;form.reset();recovering=false;await identity();
+  if(result.error) {
+   if(result.error.code==='email_not_confirmed'||/email not confirmed/i.test(result.error.message||'')) {
+    $('confirmation-email').value=d.email.trim();$('confirmation-help').scrollIntoView({behavior:'smooth',block:'center'});
+   }
+   throw result.error;
+  }
+  form.reset();recovering=false;await identity();
  });
  form('signup',async form=>{
   message('Criando conta…');const d=value(form),result=await client.auth.signUp({email:d.email.trim(),password:d.password,options:{emailRedirectTo:redirect()}});
   if(result.error)throw result.error;form.reset();
-  if(result.data?.session)await identity();else message('Cadastro recebido. Confira seu e-mail para confirmar o acesso e depois entre na sua conta.');
+  if(result.data?.session)await identity();else {
+   $('confirmation-email').value=d.email.trim();
+   message('Para concluir o cadastro, confirme seu e-mail antes de entrar. Confira a caixa de entrada e o spam. Se já possui conta, use Entrar ou Esqueci minha senha.');
+  }
+ });
+ form('resend-confirmation',async form=>{
+  await resendSignupConfirmation(client,value(form).email,redirect());
+  message('Se houver um cadastro pendente para esse e-mail, a confirmação será reenviada. Confira a caixa de entrada e o spam.');
  });
  form('reset',async form=>{
   const result=await client.auth.resetPasswordForEmail(value(form).email.trim(),{redirectTo:redirect()});if(result.error)throw result.error;

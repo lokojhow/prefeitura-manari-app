@@ -53,9 +53,15 @@ export function createEsicApi(client) {
 export function friendlyError(error) {
  const message=String(error?.message??error??'Erro inesperado.');
  if(/invalid login credentials/i.test(message)) return 'E-mail ou senha incorretos.';
- if(/email not confirmed/i.test(message)) return 'Confirme seu e-mail antes de entrar.';
+ if(/email not confirmed/i.test(message)) return 'Seu cadastro precisa de confirmação. Abra o e-mail recebido ou use Reenviar confirmação de e-mail abaixo.';
  if(/refresh.token|jwt expired|auth session missing/i.test(message)) return 'Sua sessão expirou. Entre novamente.';
  if(/failed to fetch|network|fetch failed/i.test(message)) return 'Não foi possível conectar. Confira sua internet e tente novamente.';
+ if(/email address not authorized|email_address_not_authorized/i.test(message)) return 'O serviço de envio ainda não está liberado para esse e-mail. Entre em contato com o atendimento.';
  if(/rate.limit|too many requests|security purposes/i.test(message)) return 'Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.';
  return message;
+}
+
+export async function resendSignupConfirmation(client,email,redirectTo) {
+ const result=await client.auth.resend({type:'signup',email:String(email).trim(),options:{emailRedirectTo:redirectTo}});
+ if(result.error)throw result.error;
 }
