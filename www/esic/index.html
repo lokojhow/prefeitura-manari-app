@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR" data-esic-runtime="supabase">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta name="theme-color" content="#075779">
+ <meta name="referrer" content="no-referrer">
+ <title>e-SIC | Prefeitura de Manari</title>
+ <link rel="stylesheet" href="./styles.css">
+ <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+ <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+ <header class="topbar"><div class="wrap brand"><span class="brand-mark" aria-hidden="true">M</span><div><strong>PREFEITURA DE MANARI</strong><small>Serviço de Informação ao Cidadão</small></div><span class="test-tag">Homologação</span></div></header>
+ <main id="conteudo" class="wrap">
+  <div class="hero"><div><span class="eyebrow">ACESSO À INFORMAÇÃO</span><h1>Informação pública,<br>mais perto de você.</h1><p>Faça seu pedido, acompanhe o protocolo e consulte a resposta em um só lugar. Não é necessário justificar a solicitação.</p></div><div class="hero-symbol" aria-hidden="true">e-SIC<span>MANARI • PE</span></div></div>
+  <p class="notice">Ambiente de homologação. Use dados fictícios durante os testes. O atendimento oficial existente permanece disponível.</p>
+  <div id="status" class="status" role="status" aria-live="polite">Conectando ao serviço…</div>
+  <noscript><p class="notice">Ative o JavaScript para usar o e-SIC.</p></noscript>
+
+  <section id="auth" class="card">
+   <div class="section-title"><span class="step">01</span><div><h2>Acesse sua conta</h2><p>Seu histórico fica disponível somente para você e a equipe autorizada.</p></div></div>
+   <div class="auth-grid">
+    <form id="login"><h3>Já tenho uma conta</h3><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" autocomplete="username" maxlength="254" required><label for="login-password">Senha</label><input id="login-password" name="password" type="password" autocomplete="current-password" required><button type="submit">Entrar</button></form>
+    <form id="signup"><h3>Primeiro acesso</h3><label for="signup-email">E-mail</label><input id="signup-email" name="email" type="email" autocomplete="email" maxlength="254" required><label for="signup-password">Crie uma senha</label><input id="signup-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required aria-describedby="password-help"><small id="password-help">Use pelo menos 12 caracteres.</small><button type="submit" class="secondary">Criar conta</button></form>
+   </div>
+   <details><summary>Esqueci minha senha</summary><form id="reset"><label for="reset-email">E-mail cadastrado</label><input id="reset-email" name="email" type="email" autocomplete="email" required><button type="submit" class="secondary">Enviar link de recuperação</button></form></details>
+  </section>
+
+  <section id="recovery" class="card" hidden><h2>Definir nova senha</h2><form id="new-password"><label for="new-password-input">Nova senha</label><input id="new-password-input" type="password" name="password" autocomplete="new-password" minlength="12" maxlength="128" required><button type="submit">Salvar nova senha</button></form></section>
+  <section id="account" class="account" hidden><p>Conta: <strong id="identity"></strong></p><button id="logout" class="secondary" type="button">Sair da conta</button></section>
+
+  <section id="compose" class="card" hidden><div class="section-title"><span class="step">02</span><div><h2>Solicite uma informação</h2><p>Descreva com clareza a informação pública que deseja receber.</p></div></div><form id="create"><label for="subject">Assunto</label><input id="subject" name="subject" minlength="5" maxlength="200" required placeholder="Ex.: informações sobre uma obra municipal"><label for="description">Descrição do pedido</label><textarea id="description" name="description" minlength="10" maxlength="10000" rows="6" required placeholder="Informe os detalhes que ajudarão a localizar a informação."></textarea><p class="hint">Evite incluir senhas e dados pessoais desnecessários no texto.</p><button type="submit">Registrar pedido</button></form></section>
+
+  <section id="protocols" class="card" hidden><div class="section-title"><span class="step">03</span><div><h2>Meus protocolos</h2><p>Veja as atualizações e as respostas dos seus pedidos.</p></div><button id="refresh" class="secondary" type="button">Atualizar</button></div><label for="search">Buscar por protocolo ou assunto</label><input id="search" type="search" placeholder="Digite para filtrar"><div id="requests" class="request-list"></div></section>
+
+  <section id="admin" class="card admin" hidden><div class="section-title"><span class="step">⚙</span><div><h2>Atendimento administrativo</h2><p>Fila exclusiva para administradores autorizados.</p></div><button id="queue-refresh" class="secondary" type="button">Atualizar fila</button></div><label for="queue-filter">Situação</label><select id="queue-filter"><option value="">Todas</option><option value="recebido">Recebido</option><option value="em_analise">Em análise</option><option value="respondido">Respondido</option><option value="arquivado">Arquivado</option></select><div id="queue-items" class="request-list"></div><form id="action"><h3>Registrar andamento</h3><label for="request-id">Protocolo</label><select id="request-id" name="request_id" required></select><div id="selected-request"></div><label for="action-kind">Ação</label><select id="action-kind" name="action"><option value="encaminhar">Encaminhar a um setor</option><option value="responder">Responder ao cidadão</option><option value="arquivar">Arquivar após resposta</option><option value="reabrir">Reabrir atendimento</option></select><div id="department-field"><label for="department">Setor de destino</label><input id="department" name="department" maxlength="120"></div><div id="response-field" hidden><label for="response">Resposta ao cidadão</label><textarea id="response" name="response" minlength="10" maxlength="10000" rows="6"></textarea></div><button id="action-submit" type="submit">Salvar andamento</button></form></section>
+
+  <footer class="card contact"><h2>Precisa de ajuda?</h2><p>Ouvidoria Municipal de Manari</p><a href="mailto:ouvidoria-manari-pe2023@outlook.com">ouvidoria-manari-pe2023@outlook.com</a><a href="tel:08006669090">0800 666 9090</a><p>Dias úteis, das 8h às 13h.</p><small>Prefeitura Municipal de Manari • Pernambuco</small></footer>
+ </main>
+</body>
+</html>
