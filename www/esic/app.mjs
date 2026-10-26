@@ -1,8 +1,21 @@
 import {createEsicApi,STATUS,friendlyError} from './api.mjs';
 
+export function setPasswordVisibility(input,button,visible) {
+ input.type=visible?'text':'password';
+ const action=visible?'Ocultar':'Mostrar';
+ button.textContent=action+' senha';
+ button.setAttribute('aria-pressed',String(visible));
+ button.setAttribute('aria-label',action+' '+(button.dataset.passwordLabel||'senha'));
+}
+
 export function mountEsic(document,client) {
  const $=id=>{const element=document.getElementById(id);if(!element)throw Error(`Elemento ausente: ${id}`);return element;};
  const api=createEsicApi(client);
+ for(const button of document.querySelectorAll('[data-password-target]')) {
+  const input=$(button.dataset.passwordTarget);
+  button.onclick=()=>setPasswordVisibility(input,button,input.type==='password');
+  input.form?.addEventListener('reset',()=>setPasswordVisibility(input,button,false));
+ }
  let mine=[],queue=[],allowed=false,epoch=0,recovering=false,authTimer=null,activeUserId=null;
  const value=form=>Object.fromEntries(new FormData(form));
  const show=(element,visible)=>{$(element).hidden=!visible;};

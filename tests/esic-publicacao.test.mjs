@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createEsicApi,friendlyError} from '../www/esic/api.mjs';
+import {setPasswordVisibility} from '../www/esic/app.mjs';
 const UID='76c046c7-78dd-4b73-8d53-c93f4c4da001';
 const RID='76c046c7-78dd-4b73-8d53-c93f4c4da004';
 function fixture({authenticated=true,admin=false,error=null}={}) {
@@ -60,4 +61,15 @@ test('erros de banco são propagados e falhas de sessão/rede são traduzidas',a
 });
 test('retorno de autenticação remove parâmetros e fragmentos da página',()=>{
  assert.equal(new URL('./','https://app.example/esic/?redirect_to=https://evil.test#access_token=secret').href,'https://app.example/esic/');
+});
+
+test('mostrar e ocultar senha preserva o conteúdo e atualiza o estado acessível',()=>{
+ const input={type:'password',value:'valor-ficticio-de-teste'};
+ const attributes={};const button={dataset:{passwordLabel:'senha de cadastro'},setAttribute:(key,value)=>attributes[key]=value};
+ setPasswordVisibility(input,button,true);
+ assert.equal(input.type,'text');assert.equal(input.value,'valor-ficticio-de-teste');
+ assert.equal(button.textContent,'Ocultar senha');assert.equal(attributes['aria-pressed'],'true');assert.equal(attributes['aria-label'],'Ocultar senha de cadastro');
+ setPasswordVisibility(input,button,false);
+ assert.equal(input.type,'password');assert.equal(input.value,'valor-ficticio-de-teste');
+ assert.equal(button.textContent,'Mostrar senha');assert.equal(attributes['aria-pressed'],'false');
 });
