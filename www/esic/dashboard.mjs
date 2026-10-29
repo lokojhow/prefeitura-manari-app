@@ -1,4 +1,6 @@
 export const MANARI_TIME_ZONE='America/Sao_Paulo';
+export const OTHER_DEPARTMENT='__other__';
+export const OTHER_DEPARTMENT_LABEL='Outros / Não sei qual secretaria';
 export const UNASSIGNED_DEPARTMENT='__unassigned__';
 export function manariDate(now=new Date()) {
  const parts=new Intl.DateTimeFormat('en-US',{timeZone:MANARI_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
@@ -29,6 +31,7 @@ export function dashboardParams({from='',to='',department='',status='',page=1,pa
  if(department&&!/^[a-z0-9_]{1,100}$/.test(department))throw Error('Secretaria inválida.');
  return {p_date_from:dateFrom,p_date_to:dateTo,p_department:department||null,p_status:status||null,p_page:page,p_page_size:pageSize};
 }
-export function departmentName(code,departments) {
+export function departmentName(code,departments,other=null) {
+ if(code===OTHER_DEPARTMENT||other)return OTHER_DEPARTMENT_LABEL;
  return departments.find(department=>department.code===code)?.name||(code?'Secretaria indisponível':'Secretaria não informada');
 }

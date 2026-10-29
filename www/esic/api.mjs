@@ -1,5 +1,5 @@
-import {dashboardParams} from './dashboard.mjs';
-const FIELDS = 'id,protocol,citizen_id,module,category,subject,description,status,department,requested_department_code,response_text,responded_at,created_at,updated_at';
+import {dashboardParams,OTHER_DEPARTMENT} from './dashboard.mjs';
+const FIELDS = 'id,protocol,citizen_id,module,category,subject,description,status,department,requested_department_code,requested_department_other,response_text,responded_at,created_at,updated_at';
 export const STATUS = Object.freeze({recebido:'Recebido',em_analise:'Em análise',respondido:'Respondido',arquivado:'Arquivado'});
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ok = ({data,error}) => { if(error) throw error; return data; };
@@ -23,9 +23,12 @@ export function createEsicApi(client) {
  return Object.freeze({
   async create(input) {
    const u=await user();
-   const requested_department_code=String(input.requested_department_code||'');
-   if(!/^[a-z0-9_]{1,100}$/.test(requested_department_code))throw Error('Selecione a secretaria para seu pedido.');
+   const choice=String(input.requested_department_code||'');
+   const other=choice===OTHER_DEPARTMENT;
+   const requested_department_code=other?null:choice;
+   if(!other&&!/^[a-z0-9_]{1,100}$/.test(requested_department_code))throw Error('Selecione a secretaria para seu pedido.');
    const payload={citizen_id:u.id,module:'esic',category:'geral',subject:text(input.subject,5,200,'Assunto'),description:text(input.description,10,10000,'Descrição'),requested_department_code};
+   if(other)payload.requested_department_other=text(input.requested_department_other,5,500,'Explique do que se trata');
    return ok(await client.from('manari_digital_requests').insert(payload).select(FIELDS).single());
   },
   async mine() {
