@@ -1,4 +1,5 @@
 import {createEsicApi,STATUS,friendlyError,resendSignupConfirmation} from './api.mjs';
+import {recoveryDestination,rememberRecovery} from './auth-return.mjs';
 
 export function setPasswordVisibility(input,button,visible) {
  input.type=visible?'text':'password';
@@ -16,7 +17,7 @@ export function mountEsic(document,client) {
   button.onclick=()=>setPasswordVisibility(input,button,input.type==='password');
   input.form?.addEventListener('reset',()=>setPasswordVisibility(input,button,false));
  }
- let mine=[],queue=[],allowed=false,epoch=0,recovering=false,authTimer=null,activeUserId=null;
+ let mine=[],queue=[],allowed=false,epoch=0,authTimer=null,activeUserId=null;
  const value=form=>Object.fromEntries(new FormData(form));
  const show=(element,visible)=>{$(element).hidden=!visible;};
  const date=value=>value?new Date(value).toLocaleString('pt-BR'):'—';
@@ -91,7 +92,7 @@ export function mountEsic(document,client) {
  async function refreshMine(version=epoch) {const rows=await api.mine();if(version!==epoch)return;mine=rows||[];renderMine();}
  async function refreshQueue(version=epoch) {if(!allowed)return;const rows=await api.queue();if(version!==epoch)return;queue=rows||[];renderQueue();}
  async function identity() {
-  const version=++epoch;clearPrivate();show('auth',true);show('recovery',recovering);
+  const version=++epoch;clearPrivate();show('auth',true);
   const {data,error}=await client.auth.getSession();
   if(version!==epoch)return;
   if(error) {await client.auth.signOut({scope:'local'});message(friendlyError(error),true);return;}
@@ -100,7 +101,6 @@ export function mountEsic(document,client) {
   if(user.error||!user.data?.user) {message(friendlyError(user.error||Error('Sua sessão expirou. Entre novamente.')),true);return;}
   activeUserId=user.data.user.id;
   $('identity').textContent=user.data.user.email||'Conta autenticada';show('auth',false);show('account',true);
-  if(recovering) {message('Escolha uma nova senha para sua conta.');return;}
   show('compose',true);show('protocols',true);
   const permission=await client.rpc('is_portal_admin');if(version!==epoch)return;
   allowed=!permission.error&&permission.data===true;show('admin',allowed);
@@ -118,7 +118,7 @@ export function mountEsic(document,client) {
    }
    throw result.error;
   }
-  form.reset();recovering=false;await identity();
+  form.reset();await identity();
  });
  form('signup',async form=>{
   message('Criando conta…');const d=value(form),result=await client.auth.signUp({email:d.email.trim(),password:d.password,options:{emailRedirectTo:redirect()}});
@@ -136,10 +136,6 @@ export function mountEsic(document,client) {
   const result=await client.auth.resetPasswordForEmail(value(form).email.trim(),{redirectTo:redirect()});if(result.error)throw result.error;
   form.reset();message('Se houver uma conta com esse e-mail, você receberá um link de recuperação.');
  });
- form('new-password',async form=>{
-  const result=await client.auth.updateUser({password:value(form).password});if(result.error)throw result.error;
-  form.reset();recovering=false;await identity();message('Senha atualizada. Você já pode acompanhar seus protocolos.');
- });
  form('create',async form=>{
   message('Registrando pedido…');const version=epoch;let created;
   try{created=await api.create(value(form));}catch(error){if(/network|fetch/i.test(String(error.message)))throw Error('Não foi possível confirmar o registro. Atualize seus protocolos antes de enviar novamente.');throw error;}
@@ -155,7 +151,7 @@ export function mountEsic(document,client) {
   if(version===epoch)message('Andamento registrado e histórico atualizado.');
  });
  $('logout').onclick=()=>void run($('logout'),async()=>{
-  ++epoch;clearTimeout(authTimer);clearPrivate();activeUserId=null;recovering=false;show('auth',true);show('recovery',false);
+  ++epoch;clearTimeout(authTimer);clearPrivate();activeUserId=null;show('auth',true);
   const result=await client.auth.signOut({scope:'local'});if(result.error)throw result.error;message('Sessão encerrada. Entre ou crie outra conta abaixo.');
   $('auth').scrollIntoView({behavior:'smooth',block:'start'});$('login-email').focus({preventScroll:true});
  });
@@ -165,9 +161,13 @@ export function mountEsic(document,client) {
  $('request-id').onchange=selectedRequest;$('action-kind').onchange=actionFields;
  client.auth.onAuthStateChange((event,session)=>{
   // Never await a Supabase API call while the auth callback holds its lock.
-  if(event==='PASSWORD_RECOVERY')recovering=true;
+  if(event==='PASSWORD_RECOVERY') {
+   rememberRecovery(document.defaultView.sessionStorage,session);
+   document.location.replace(new URL('./redefinir-senha/',document.location.href).href);
+   return;
+  }
   const changedAccount=event==='SIGNED_IN'&&session?.user?.id!==activeUserId;
-  if(changedAccount||['SIGNED_OUT','PASSWORD_RECOVERY','USER_UPDATED'].includes(event)) {
+  if(changedAccount||['SIGNED_OUT','USER_UPDATED'].includes(event)) {
    if(event==='SIGNED_OUT'||changedAccount){++epoch;clearPrivate();activeUserId=null;show('auth',true);}
    clearTimeout(authTimer);authTimer=setTimeout(()=>void run(null,identity),0);
   }
@@ -177,6 +177,9 @@ export function mountEsic(document,client) {
 }
 
 if(typeof document!=='undefined' && document.documentElement.dataset.esicRuntime==='supabase') {
+ const recoveryTarget=recoveryDestination(document.location.href);
+ if(recoveryTarget)document.location.replace(recoveryTarget);
+ else {
  try {
   const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2.57.0');
   const client=createClient('https://dxvqiiawthxwkypvsxci.supabase.co','sb_publishable_Zno2VuYH9oev89OpttorUA_wzNb0EP6',{auth:{storageKey:'manari-esic-auth-v1',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -184,5 +187,6 @@ if(typeof document!=='undefined' && document.documentElement.dataset.esicRuntime
  } catch(error) {
   const status=document.getElementById('status');status.classList.add('error');status.textContent='Não foi possível iniciar o serviço. Recarregue a página ou entre em contato com a Ouvidoria.';
   console.error('Falha de inicialização do e-SIC:',error);
+ }
  }
 }

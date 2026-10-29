@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR" data-esic-runtime="password-recovery">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta name="theme-color" content="#075779">
+ <meta name="referrer" content="no-referrer">
+ <title>Redefinir senha | e-SIC Manari</title>
+ <link rel="stylesheet" href="../styles.css">
+ <script type="module" src="../password-reset.mjs"></script>
+</head>
+<body>
+ <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+ <header class="topbar"><div class="wrap brand"><span class="brand-mark" aria-hidden="true">M</span><div><strong>PREFEITURA DE MANARI</strong><small>Serviço de Informação ao Cidadão</small></div><span class="test-tag">Homologação</span></div></header>
+ <main id="conteudo" class="wrap recovery-page">
+  <span class="eyebrow">ACESSO À SUA CONTA</span>
+  <h1>Redefinir senha</h1>
+  <p>Recupere o acesso à sua conta do e-SIC Manari.</p>
+  <div id="recovery-status" class="status" role="status" aria-live="polite">Verificando seu link de recuperação…</div>
+  <noscript><p class="notice">Ative o JavaScript para redefinir sua senha.</p></noscript>
+  <section id="password-editor" class="card" hidden aria-labelledby="password-editor-title">
+   <h2 id="password-editor-title">Defina sua nova senha</h2>
+   <p id="recovery-identity" class="hint"></p>
+   <form id="password-editor-form">
+    <label for="recovery-password">Nova senha</label>
+    <div class="password-field"><input id="recovery-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required aria-describedby="recovery-password-help"><button type="button" class="password-toggle" data-password-target="recovery-password" data-password-label="nova senha" aria-controls="recovery-password" aria-pressed="false" aria-label="Mostrar nova senha">Mostrar senha</button></div>
+    <small id="recovery-password-help">Use pelo menos 8 caracteres.</small>
+    <label for="recovery-confirmation">Confirme a nova senha</label>
+    <div class="password-field"><input id="recovery-confirmation" name="confirmation" type="password" autocomplete="new-password" minlength="8" maxlength="128" required><button type="button" class="password-toggle" data-password-target="recovery-confirmation" data-password-label="confirmação da nova senha" aria-controls="recovery-confirmation" aria-pressed="false" aria-label="Mostrar confirmação da nova senha">Mostrar senha</button></div>
+    <button type="submit">Salvar nova senha</button>
+   </form>
+  </section>
+  <section id="recovery-request-card" class="card" hidden aria-labelledby="recovery-request-title">
+   <h2 id="recovery-request-title">Receba um link de recuperação</h2>
+   <p>Informe o e-mail usado no seu cadastro. Se o link anterior expirou, peça outro aqui.</p>
+   <form id="recovery-request"><label for="recovery-email">E-mail cadastrado</label><input id="recovery-email" name="email" type="email" autocomplete="email" maxlength="254" required><button type="submit">Enviar novo link de recuperação</button></form>
+  </section>
+  <section id="recovery-complete" class="card" hidden><h2>Senha atualizada</h2><p>Seu acesso foi recuperado. Use a nova senha ao entrar.</p><a class="button-link" href="../">Entrar no e-SIC</a></section>
+  <p><a href="../">Voltar para o e-SIC</a></p>
+  <footer class="contact recovery-contact"><p>Precisa de ajuda? Ouvidoria Municipal de Manari</p><a href="mailto:ouvidoria-manari-pe2023@outlook.com">ouvidoria-manari-pe2023@outlook.com</a><a href="tel:08006669090">0800 666 9090</a></footer>
+ </main>
+</body>
+</html>
