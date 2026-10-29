@@ -34,15 +34,15 @@ test('fila administrativa autorizada restringe módulo e-SIC',async()=>{
  assert(calls.some(c=>c[0]==='eq'&&c[1]==='module'&&c[2]==='esic'));
 });
 test('cadastro de pedido ignora campos administrativos forjados',async()=>{
- const {api,calls}=fixture();await api.create({subject:'  Pedido teste  ',description:'Uma descrição fictícia completa.',citizen_id:'outro',status:'respondido',response_text:'forjado'});
- assert.deepEqual(calls.find(c=>c[0]==='insert')[1],{citizen_id:UID,module:'esic',category:'geral',subject:'Pedido teste',description:'Uma descrição fictícia completa.'});
+ const {api,calls}=fixture();await api.create({subject:'  Pedido teste  ',description:'Uma descrição fictícia completa.',requested_department_code:'educacao',citizen_id:'outro',department:'forjado',status:'respondido',response_text:'forjado'});
+ assert.deepEqual(calls.find(c=>c[0]==='insert')[1],{citizen_id:UID,module:'esic',category:'geral',subject:'Pedido teste',description:'Uma descrição fictícia completa.',requested_department_code:'educacao'});
 });
 test('sem sessão, envio e listagem não acessam tabelas',async()=>{
  const {api,calls}=fixture({authenticated:false});await assert.rejects(api.create({}),/Entre/);await assert.rejects(api.mine(),/Entre/);assert.equal(calls.length,0);
 });
 test('validadores rejeitam texto vazio, IDs inválidos e ação nula',async()=>{
  const {api,calls}=fixture({admin:true});
- await assert.rejects(api.create({subject:'    ',description:'Descrição válida de teste.'}),/Assunto/);
+ await assert.rejects(api.create({subject:'    ',description:'Descrição válida de teste.',requested_department_code:'educacao'}),/Assunto/);
  await assert.rejects(api.history('outro'),/Protocolo inválido/);
  await assert.rejects(api.act({requestId:RID,action:null}),/Ação inválida/);
  await assert.rejects(api.act({requestId:RID,action:'responder',response:'  '}),/Resposta/);
