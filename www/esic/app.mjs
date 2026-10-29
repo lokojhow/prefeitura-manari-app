@@ -1,6 +1,6 @@
 import {createEsicApi,STATUS,friendlyError,resendSignupConfirmation} from './api.mjs';
 import {recoveryDestination,rememberRecovery} from './auth-return.mjs';
-import {dateRangeForPreset,departmentName,MANARI_TIME_ZONE,UNASSIGNED_DEPARTMENT} from './dashboard.mjs';
+import {dateRangeForPreset,departmentName,MANARI_TIME_ZONE,UNASSIGNED_DEPARTMENT,OTHER_DEPARTMENT,OTHER_DEPARTMENT_LABEL} from './dashboard.mjs';
 
 export function setPasswordVisibility(input,button,visible) {
  input.type=visible?'text':'password';
@@ -33,7 +33,7 @@ export function mountEsic(document,client) {
   $('queue-department').replaceChildren();$('department-chart').replaceChildren();
   for(const id of ['stat-total','stat-open','stat-answered','stat-archived'])$(id).textContent='0';
   $('queue-summary').textContent='Carregando chamados…';$('queue-page').textContent='Página 1 de 1';$('admin').setAttribute('aria-busy','false');
-  $('create').reset();$('action').reset();
+  $('create').reset();updateOtherDepartment();$('action').reset();
   for(const target of ['compose','protocols','admin','account','workspace-tabs','citizen-workspace','admin-detail','dashboard-insights'])show(target,false);
   document.body.classList.remove('admin-workspace');
  }
@@ -49,7 +49,8 @@ export function mountEsic(document,client) {
   const head=node('div',null,'request-head');
   head.append(node('span',request.protocol,'protocol'),node('span',STATUS[request.status]||request.status,`badge ${request.status}`));
   card.append(head,node('h3',request.subject),node('p',`Registrado em ${date(request.created_at)}`,'hint'),node('p',request.description,'long-text'));
-  card.append(node('p',`Secretaria do pedido: ${departmentName(request.requested_department_code,departments)}`,'request-department'));
+  card.append(node('p',`Secretaria do pedido: ${departmentName(request.requested_department_code,departments,request.requested_department_other)}`,'request-department'));
+  if(request.requested_department_other)card.append(node('p',`Informado pelo cidadão: ${request.requested_department_other}`,'long-text'));
   if(request.department)card.append(node('p',`Setor responsável: ${request.department}`));
   if(request.response_text) {
    const response=node('div',null,'response');
@@ -77,9 +78,15 @@ export function mountEsic(document,client) {
  function option(text,value) {const item=node('option',text);item.value=value;return item;}
  function departmentOptions() {
   const active=departments.filter(department=>department.active!==false);
-  $('requested-department').replaceChildren(option('Selecione a secretaria',''),...active.map(d=>option(d.code==='ouvidoria'?`${d.name} — não sei qual secretaria escolher`:d.name,d.code)));
+  $('requested-department').replaceChildren(option('Selecione a secretaria',''),...active.map(d=>option(d.name,d.code)),option(OTHER_DEPARTMENT_LABEL,OTHER_DEPARTMENT));
   $('department').replaceChildren(option('Selecione a secretaria',''),...active.map(d=>option(d.name,d.name)));
-  $('queue-department').replaceChildren(option('Todas as secretarias',''),option('Secretaria não informada',UNASSIGNED_DEPARTMENT),...departments.map(d=>option(d.name+(d.active===false?' (inativa)':''),d.code)));
+  $('queue-department').replaceChildren(option('Todas as secretarias',''),option('Secretaria não informada',UNASSIGNED_DEPARTMENT),option(OTHER_DEPARTMENT_LABEL,OTHER_DEPARTMENT),...departments.map(d=>option(d.name+(d.active===false?' (inativa)':''),d.code)));
+ }
+ function updateOtherDepartment() {
+  const other=$('requested-department').value===OTHER_DEPARTMENT;
+  show('requested-department-other-field',other);
+  const field=$('requested-department-other');field.disabled=!other;field.required=other;
+  if(!other)field.value='';
  }
  function setWorkspace(next) {
   workspace=next;
@@ -106,7 +113,7 @@ export function mountEsic(document,client) {
    const cell=(label,content)=>{const td=node('td');td.dataset.label=label;td.append(content);row.append(td);};
    cell('Abertura',node('span',date(request.created_at),'queue-date'));
    const identity=node('div');identity.append(node('span',request.protocol,'protocol'),node('strong',request.subject));cell('Protocolo e assunto',identity);
-   cell('Secretaria',node('span',departmentName(request.requested_department_code,departments)));
+   cell('Secretaria',node('span',departmentName(request.requested_department_code,departments,request.requested_department_other)));
    cell('Situação',node('span',STATUS[request.status]||request.status,`badge ${request.status}`));
    const open=node('button','Atender','secondary');open.type='button';open.setAttribute('aria-label',`Atender protocolo ${request.protocol}`);open.onclick=()=>{selectedId=request.id;$('request-id').value=request.id;selectedRequest();$('admin-detail').scrollIntoView({behavior:'smooth',block:'start'});};cell('Atendimento',open);
    return row;
@@ -200,7 +207,7 @@ export function mountEsic(document,client) {
  form('create',async form=>{
   message('Registrando pedido…');const version=epoch;let created;
   try{created=await api.create(value(form));}catch(error){if(/network|fetch/i.test(String(error.message)))throw Error('Não foi possível confirmar o registro. Atualize seus protocolos antes de enviar novamente.');throw error;}
-  if(version!==epoch)return;form.reset();
+  if(version!==epoch)return;form.reset();updateOtherDepartment();
   try{await refreshMine(version);await refreshQueue(version);}catch{message(`Pedido registrado: ${created.protocol}. A atualização da lista falhou; use Atualizar.`,true);return;}
   if(version===epoch)message(`Pedido registrado com sucesso. Seu protocolo é ${created.protocol}.`);
  });
@@ -226,6 +233,8 @@ export function mountEsic(document,client) {
  $('queue-next').onclick=()=>{++dashboardPage;void run(null,refreshQueue);};
  $('workspace-admin').onclick=()=>setWorkspace('admin');$('workspace-citizen').onclick=()=>setWorkspace('citizen');
  $('close-request').onclick=()=>{$('request-id').value='';selectedRequest();};
+ $('requested-department').onchange=updateOtherDepartment;
+ $('create').addEventListener('reset',()=>queueMicrotask(updateOtherDepartment));
  $('search').oninput=renderMine;
  $('request-id').onchange=selectedRequest;$('action-kind').onchange=actionFields;
  client.auth.onAuthStateChange((event,session)=>{

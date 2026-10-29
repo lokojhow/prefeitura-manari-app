@@ -1,6 +1,6 @@
 // Browser-only, in-memory fixture. Copy beside app.mjs for local QA; never ship.
 import {mountEsic} from './app.mjs';
-import {manariDate,dateRangeForPreset} from './dashboard.mjs';
+import {manariDate,dateRangeForPreset,OTHER_DEPARTMENT,OTHER_DEPARTMENT_LABEL} from './dashboard.mjs';
 const adminId='76c046c7-78dd-4b73-8d53-c93f4c4da003',citizenId='76c046c7-78dd-4b73-8d53-c93f4c4da001';
 let admin=new URL(location.href).searchParams.get('as')!=='citizen',user={id:admin?adminId:citizenId,email:admin?'administrador@example.invalid':'cidadao@example.invalid'},authChanged=()=>{};
 const departments=[{code:'educacao',name:'Educação',active:true},{code:'obras',name:'Infraestrutura e Obras',active:true},{code:'agricultura',name:'Agricultura',active:true},{code:'ouvidoria',name:'Ouvidoria e LAI',active:true}];
@@ -12,10 +12,10 @@ const rows=Array.from({length:34},(_,i)=>{
 });
 const events=[];
 function dashboard(p) {
- const matches=rows.filter(r=>r.module==='esic'&&(!p.p_date_from||manariDate(new Date(r.created_at))>=p.p_date_from)&&(!p.p_date_to||manariDate(new Date(r.created_at))<=p.p_date_to)&&(!p.p_status||r.status===p.p_status)&&(!p.p_department||(p.p_department==='__unassigned__'?!r.requested_department_code:r.requested_department_code===p.p_department))).sort((a,b)=>b.created_at.localeCompare(a.created_at)||b.id.localeCompare(a.id));
+ const matches=rows.filter(r=>r.module==='esic'&&(!p.p_date_from||manariDate(new Date(r.created_at))>=p.p_date_from)&&(!p.p_date_to||manariDate(new Date(r.created_at))<=p.p_date_to)&&(!p.p_status||r.status===p.p_status)&&(!p.p_department||(p.p_department==='__unassigned__'?!r.requested_department_code&&!r.requested_department_other:p.p_department===OTHER_DEPARTMENT?Boolean(r.requested_department_other):r.requested_department_code===p.p_department))).sort((a,b)=>b.created_at.localeCompare(a.created_at)||b.id.localeCompare(a.id));
  const open=matches.filter(r=>['recebido','em_analise'].includes(r.status)),groups=new Map();
- for(const row of open){const code=row.requested_department_code;groups.set(code,(groups.get(code)||0)+1);}
- return {rows:matches.slice((p.p_page-1)*p.p_page_size,p.p_page*p.p_page_size),total:matches.length,page:p.p_page,page_size:p.p_page_size,totals:{total:matches.length,open:open.length,answered:matches.filter(r=>r.status==='respondido').length,archived:matches.filter(r=>r.status==='arquivado').length},departments:[...groups].map(([code,count])=>({code,name:departments.find(d=>d.code===code)?.name||'Secretaria não informada',open:count})).sort((a,b)=>b.open-a.open)};
+ for(const row of open){const code=row.requested_department_other?OTHER_DEPARTMENT:row.requested_department_code;groups.set(code,(groups.get(code)||0)+1);}
+ return {rows:matches.slice((p.p_page-1)*p.p_page_size,p.p_page*p.p_page_size),total:matches.length,page:p.p_page,page_size:p.p_page_size,totals:{total:matches.length,open:open.length,answered:matches.filter(r=>r.status==='respondido').length,archived:matches.filter(r=>r.status==='arquivado').length},departments:[...groups].map(([code,count])=>({code,name:code===OTHER_DEPARTMENT?OTHER_DEPARTMENT_LABEL:departments.find(d=>d.code===code)?.name||'Secretaria não informada',open:count})).sort((a,b)=>b.open-a.open)};
 }
 const client={auth:{
  getSession:async()=>({data:{session:user?{user}:null},error:null}),getUser:async()=>({data:{user},error:null}),
