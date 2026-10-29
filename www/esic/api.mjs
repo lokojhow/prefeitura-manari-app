@@ -1,4 +1,5 @@
-const FIELDS = 'id,protocol,citizen_id,module,category,subject,description,status,department,response_text,responded_at,created_at,updated_at';
+import {dashboardParams} from './dashboard.mjs';
+const FIELDS = 'id,protocol,citizen_id,module,category,subject,description,status,department,requested_department_code,response_text,responded_at,created_at,updated_at';
 export const STATUS = Object.freeze({recebido:'Recebido',em_analise:'Em análise',respondido:'Respondido',arquivado:'Arquivado'});
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ok = ({data,error}) => { if(error) throw error; return data; };
@@ -22,7 +23,9 @@ export function createEsicApi(client) {
  return Object.freeze({
   async create(input) {
    const u=await user();
-   const payload={citizen_id:u.id,module:'esic',category:'geral',subject:text(input.subject,5,200,'Assunto'),description:text(input.description,10,10000,'Descrição')};
+   const requested_department_code=String(input.requested_department_code||'');
+   if(!/^[a-z0-9_]{1,100}$/.test(requested_department_code))throw Error('Selecione a secretaria para seu pedido.');
+   const payload={citizen_id:u.id,module:'esic',category:'geral',subject:text(input.subject,5,200,'Assunto'),description:text(input.description,10,10000,'Descrição'),requested_department_code};
    return ok(await client.from('manari_digital_requests').insert(payload).select(FIELDS).single());
   },
   async mine() {
@@ -32,6 +35,13 @@ export function createEsicApi(client) {
   async queue() {
    await admin();
    return ok(await client.from('manari_digital_requests').select(FIELDS).eq('module','esic').order('created_at',{ascending:false}));
+  },
+  async departments() {
+   return ok(await client.from('portal_departments').select('code,name,active,sort_order').order('sort_order',{ascending:true}));
+  },
+  async dashboard(filters) {
+   const params=dashboardParams(filters);await admin();
+   return ok(await client.rpc('manari_digital_admin_dashboard',params));
   },
   async history(requestId) {
    id(requestId);
@@ -58,6 +68,7 @@ export function friendlyError(error) {
  if(/failed to fetch|network|fetch failed/i.test(message)) return 'Não foi possível conectar. Confira sua internet e tente novamente.';
  if(/email address not authorized|email_address_not_authorized/i.test(message)) return 'O serviço de envio ainda não está liberado para esse e-mail. Entre em contato com o atendimento.';
  if(/rate.limit|too many requests|security purposes/i.test(message)) return 'Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.';
+ if(error?.code==='23503'&&/requested_department/i.test(message))return 'A secretaria selecionada não está disponível. Atualize a página e escolha outra opção.';
  return message;
 }
 
