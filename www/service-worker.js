@@ -1,5 +1,5 @@
-const CACHE='manari-v6-16-ouvidoria-isolada';
-const VERSION='6.15';
+const CACHE='manari-v6-17-ouvidoria-no-portal';
+const VERSION='6.17';
 const ESIC_BASE=new URL('esic/',self.registration.scope).pathname;
 const OUV_BASE=new URL('ouvidoria/',self.registration.scope).pathname;
 const isOuvidoriaPath=pathname=>pathname===OUV_BASE.slice(0,-1)||pathname.startsWith(OUV_BASE);

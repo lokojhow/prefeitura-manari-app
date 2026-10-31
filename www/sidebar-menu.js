@@ -3,19 +3,21 @@
   if(window.__MANARI_ESIC_ROUTING__)return;
   window.__MANARI_ESIC_ROUTING__=true;
   document.addEventListener('click',event=>{
-    const target=event.target.closest('[data-service],[data-service-url],[data-nav="esic"]');
+    const target=event.target.closest('[data-service],[data-service-url],[data-nav="esic"],[data-nav="ouvidoria"],.sm-quick-card[data-url]');
     if(!target)return;
     const label=String(target.getAttribute('data-service')||target.querySelector('b')?.textContent||target.textContent||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-    if(target.getAttribute('data-nav')!=='esic'&&!/^(?:e[\s-]?sic|lai\s*\/\s*e[\s-]?sic)(?:$|[\s/])/.test(label))return;
+    const nav=target.getAttribute('data-nav');
+    const module=nav==='ouvidoria'||/^ouvidoria(?:$|[\s/])/.test(label)?'ouvidoria':nav==='esic'||/^(?:e[\s-]?sic|lai\s*\/\s*e[\s-]?sic)(?:$|[\s/])/.test(label)?'esic':null;
+    if(!module)return;
     event.preventDefault();event.stopImmediatePropagation();
-    window.location.assign(new URL('./esic/',window.location.href).href);
+    window.location.assign(new URL('./'+module+'/',window.location.href).href);
   },true);
 })();
 // ESIC_ROUTING_END
 
 // Prefeitura de Manari — modo clássico V6.0
 (() => {
-  if(window.__MANARI_CLASSIC_BOOTSTRAP__)return;window.__MANARI_CLASSIC_BOOTSTRAP__=true;const VERSION='6.14';
+  if(window.__MANARI_CLASSIC_BOOTSTRAP__)return;window.__MANARI_CLASSIC_BOOTSTRAP__=true;const VERSION='6.17';
   const gate=document.createElement('style');gate.id='manari-classic-gate';gate.textContent='.app-shell,.main-view,main{visibility:hidden!important}';document.head.appendChild(gate);
   const reveal=()=>{document.getElementById('manari-classic-gate')?.remove();document.getElementById('manari-first-paint-gate')?.remove()};setTimeout(reveal,5000);
   document.getElementById('manariSocialApp')?.remove();document.body?.classList.remove('manari-social-v2');document.querySelectorAll('#app,.app-shell,.site-shell,main').forEach(el=>el.removeAttribute('aria-hidden'));document.getElementById('manari-v4-boot-gate')?.remove();document.getElementById('manari-preboot')?.remove();

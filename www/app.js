@@ -33,8 +33,8 @@
   const OFFICIAL_LINKS = {
     'Carta de Serviços':'https://w3d.app.br/ouvidoria/manari/menu_lateral/',
     'Nota Fiscal Eletrônica':'https://www.municipioonline.com.br/pe/prefeitura/manari/contribuinte/notafiscal',
-    'Ouvidoria':'https://w3d.app.br/ouvidoria/manari/menu_lateral/',
-    'E-SIC':'https://w3d.app.br/ouvidoria/manari/menu_lateral/',
+    'Ouvidoria':'./ouvidoria/',
+    'E-SIC':'./esic/',
     'Contracheque Online':'https://w3d.app.br/manari/recursos-humanos/emissao-de-contracheque/',
     'Portal do Servidor':'https://w3d.app.br/manari/recursos-humanos/emissao-de-contracheque/',
     'Licitações e Contratos':'https://w3d.app.br/manari/licitacoes/processos-licitatorios/',
@@ -263,6 +263,7 @@
   }
 
   async function render(route, push=true, preservedScroll=null){
+    if(route==='ouvidoria'){window.location.assign(new URL('./ouvidoria/',window.location.href).href);return}
     currentRoute=route;
     const d=departments.find(x=>x.id===route);
     main.innerHTML = route==='home' ? homeTemplate() : d ? departmentTemplate(d) : genericArea(route);
