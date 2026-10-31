@@ -54,7 +54,7 @@ async function serviceWorker(scope='https://portal.example/') {
 test('cache do portal não intercepta nem reescreve páginas e arquivos do e-SIC',async()=>{
  const {context,listeners}=await serviceWorker();
  const html='<html data-esic-runtime="supabase"><head></head><body><main>e-SIC</main></body></html>';
- for(const path of ['/esic','/esic/','/esic/index.html','/esic/app.mjs','/esic/styles.css']) {
+ for(const path of ['/esic','/esic/','/esic/index.html','/esic/app.mjs','/esic/styles.css','/ouvidoria','/ouvidoria/','/ouvidoria/app.mjs']) {
   let intercepted=false;
   listeners.fetch({request:{method:'GET',url:'https://portal.example'+path,mode:'navigate'},respondWith(){intercepted=true;}});
   assert.equal(intercepted,false,path);
