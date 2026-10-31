@@ -1,5 +1,5 @@
 import {dashboardParams,OTHER_DEPARTMENT} from './dashboard.mjs';
-const FIELDS = 'id,protocol,citizen_id,module,category,subject,description,status,department,requested_department_code,requested_department_other,response_text,responded_at,created_at,updated_at';
+const FIELDS = 'id,protocol,citizen_id,module,category,subject,description,status,department,requested_department_code,requested_department_other,due_date,extended_at,extension_reason,response_by,response_read_at,response_outcome,response_text,responded_at,created_at,updated_at';
 export const STATUS = Object.freeze({recebido:'Recebido',em_analise:'Em análise',respondido:'Respondido',arquivado:'Arquivado'});
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ok = ({data,error}) => { if(error) throw error; return data; };
@@ -49,7 +49,7 @@ export function createEsicApi(client) {
   async history(requestId) {
    id(requestId);
    await user();
-   return ok(await client.from('manari_digital_events').select('event_type,details,created_at').eq('request_id',requestId).order('created_at'));
+   return ok(await client.rpc('manari_esic_history',{p_request:requestId}));
   },
   async act({requestId,action,department,response}) {
    id(requestId);

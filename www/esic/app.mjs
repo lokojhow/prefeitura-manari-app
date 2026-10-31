@@ -1,4 +1,6 @@
 import {createEsicApi,STATUS,friendlyError,resendSignupConfirmation} from './api.mjs';
+import {mountWorkflow} from './workflow-ui.mjs';
+import {dateLabel} from './workflow-api.mjs';
 import {recoveryDestination,rememberRecovery} from './auth-return.mjs';
 import {dateRangeForPreset,departmentName,MANARI_TIME_ZONE,UNASSIGNED_DEPARTMENT,OTHER_DEPARTMENT,OTHER_DEPARTMENT_LABEL} from './dashboard.mjs';
 
@@ -24,9 +26,10 @@ export function mountEsic(document,client) {
  const show=(element,visible)=>{$(element).hidden=!visible;};
  const date=value=>value?new Date(value).toLocaleString('pt-BR',{timeZone:MANARI_TIME_ZONE}):'—';
  const message=(text,error=false)=>{const el=$('status');el.textContent=text;el.classList.toggle('error',error);};
+ const workflow=mountWorkflow(document,client,{context:()=>({admin:allowed,userId:activeUserId,epoch}),notify:message,refresh:async()=>{await refreshMine();await refreshQueue();}});
  function node(tag,text,className) {const el=document.createElement(tag);if(text!=null)el.textContent=text;if(className)el.className=className;return el;}
  function clearPrivate() {
-  mine=[];queue=[];departments=[];allowed=false;dashboardPage=1;selectedId='';++dashboardVersion;
+  workflow.clear();mine=[];queue=[];departments=[];allowed=false;dashboardPage=1;selectedId='';++dashboardVersion;
   for(const target of ['requests','queue-items','request-id','selected-request'])$(target).replaceChildren();
   $('identity').textContent='';$('search').value='';$('queue-filter').value='';
   $('queue-period').value='all';$('queue-from').value='';$('queue-to').value='';updatePeriod();
@@ -62,11 +65,11 @@ export function mountEsic(document,client) {
   history.ontoggle=()=>{if(!history.open||loaded)return;const version=epoch;void run(null,async()=>{
    historyBody.textContent='Carregando histórico…';const rows=await api.history(request.id);if(version!==epoch)return;
    const list=node('ol',null,'history');list.append(node('li',`${date(request.created_at)} — Pedido registrado`));
-   const names={criado:'Pedido registrado',encaminhado:'Encaminhado',respondido:'Respondido',arquivado:'Arquivado',reaberto:'Reaberto',recurso:'Recurso registrado'};
+   const names={criado:'Pedido registrado',encaminhado:'Encaminhado',respondido:'Respondido',arquivado:'Arquivado',reaberto:'Reaberto',recurso:'Recurso registrado',prorrogado:'Prazo prorrogado',ciencia:'Resposta consultada',recurso_decidido:'Recurso decidido'};
    for(const row of rows||[])if(row.event_type!=='criado')list.append(node('li',`${date(row.created_at)} — ${names[row.event_type]||row.event_type}${row.details?' • '+row.details:''}`));
    historyBody.replaceChildren(list);loaded=true;
   });};
-  card.append(history);
+  card.append(history);workflow.decorate(card,request);
   return card;
  }
  function renderMine() {
@@ -111,7 +114,7 @@ export function mountEsic(document,client) {
   $('queue-items').replaceChildren(...queue.map(request=>{
    const row=node('tr');
    const cell=(label,content)=>{const td=node('td');td.dataset.label=label;td.append(content);row.append(td);};
-   cell('Abertura',node('span',date(request.created_at),'queue-date'));
+   const opening=node('div');opening.append(node('span',date(request.created_at),'queue-date'));const due=workflow.deadline(request);if(due.date)opening.append(node('small',`Prazo: ${dateLabel(due.date)}`,`deadline ${due.state}`));cell('Abertura',opening);
    const identity=node('div');identity.append(node('span',request.protocol,'protocol'),node('strong',request.subject));cell('Protocolo e assunto',identity);
    cell('Secretaria',node('span',departmentName(request.requested_department_code,departments,request.requested_department_other)));
    cell('Situação',node('span',STATUS[request.status]||request.status,`badge ${request.status}`));
@@ -129,6 +132,7 @@ export function mountEsic(document,client) {
   const chart=node('ul',null,'department-bars');
   for(const row of rows){const item=node('li'),label=node('div',null,'bar-label');label.append(node('span',row.name),node('strong',Number(row.open).toLocaleString('pt-BR')));const track=node('div',null,'bar-track'),bar=node('div',null,'bar-fill');bar.style.width=(Number(row.open)/max*100)+'%';track.append(bar);item.append(label,track);chart.append(item);}
   $('department-chart').replaceChildren(rows.length?chart:node('p','Nenhum chamado aberto para os filtros selecionados.','empty'));
+  $('deadline-summary').textContent=`Prazos nos filtros: ${Number(data.totals.overdue||0)} vencidos • ${Number(data.totals.due_soon||0)} vencem em até 3 dias.`;
   show('dashboard-insights',true);
  }
  function selectedRequest() {
@@ -145,7 +149,7 @@ export function mountEsic(document,client) {
   show('department-field',action==='encaminhar');$('department').required=action==='encaminhar';
   show('response-field',action==='responder');$('response').required=action==='responder';
  }
- async function refreshMine(version=epoch) {const rows=await api.mine();if(version!==epoch)return;mine=rows||[];renderMine();}
+ async function refreshMine(version=epoch) {const rows=await api.mine();if(version!==epoch)return;mine=rows||[];await workflow.load([...mine.slice(0,100),...queue],()=>version===epoch);if(version===epoch)renderMine();}
  async function refreshQueue(version=epoch) {
   if(!allowed)return;const current=++dashboardVersion;
   $('admin').setAttribute('aria-busy','true');show('dashboard-insights',false);show('admin-detail',false);
@@ -155,7 +159,7 @@ export function mountEsic(document,client) {
    if(!Array.isArray(data?.rows)||!data.totals)throw Error('Não foi possível carregar o painel. Tente atualizar novamente.');
    const lastPage=Math.max(1,Math.ceil(Number(data.total)/data.page_size));
    if(dashboardPage>lastPage){dashboardPage=lastPage;return await refreshQueue(version);}
-   queue=data.rows;renderQueue(data);
+   queue=data.rows;await workflow.load([...mine.slice(0,100),...queue],()=>version===epoch&&current===dashboardVersion);if(version!==epoch||current!==dashboardVersion)return;renderQueue(data);
   } catch(error) {if(version===epoch&&current===dashboardVersion){queue=[];selectedId='';$('queue-summary').textContent='Não foi possível atualizar os chamados.';queueNotice('Confira os filtros e tente atualizar o painel.');throw error;}}
   finally {if(version===epoch&&current===dashboardVersion)$('admin').setAttribute('aria-busy','false');}
  }
