@@ -5,29 +5,31 @@ import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL('../'+path,import.meta.url),'utf8');
 
-test('cartão E-SIC abre a pasta nova e Ouvidoria conserva o canal existente',async()=>{
+test('cartões e menus abrem Ouvidoria e e-SIC nas aplicações separadas',async()=>{
  const source=await read('www/app.js');
  const match=source.match(/const OFFICIAL_LINKS\s*=\s*({[\s\S]*?});/);assert(match);
  const links=vm.runInNewContext('('+match[1]+')');
- assert.equal(links.Ouvidoria,'https://w3d.app.br/ouvidoria/manari/menu_lateral/');
+ assert.equal(links.Ouvidoria,'./ouvidoria/');assert.equal(links['E-SIC'],'./esic/');
  const routing=(await read('www/sidebar-menu.js')).split('// ESIC_ROUTING_BEGIN')[1].split('// ESIC_ROUTING_END')[0];
  for(const base of ['https://portal.example/#ouvidoria','https://portal.example/www/index.html#ouvidoria']) {
   const destinations=[];let handler;
   const window={location:{href:base,assign:url=>destinations.push(url)}};
   vm.runInNewContext(routing,{window,URL,document:{addEventListener:(type,fn)=>handler=fn}});
-  const click=label=>{
+  const click=(label,nav=null)=>{
    let prevented=false;
-   const target={getAttribute:key=>key==='data-service'?label:null,querySelector:()=>null};
+   const target={getAttribute:key=>key==='data-service'?label:key==='data-nav'?nav:null,querySelector:()=>null};
    handler({target:{closest:()=>target},preventDefault(){prevented=true;},stopImmediatePropagation(){}});
    return prevented;
   };
   assert.equal(click('E-SIC'),true);assert.equal(click('e-SIC / Acesso à Informação'),true);
-  assert.equal(click('Ouvidoria'),false);assert.equal(destinations.length,2);
-  assert(destinations.every(url=>url===new URL('./esic/',base).href));
+  assert.equal(click('Ouvidoria'),true);assert.equal(click('Ouvidoria Municipal'),true);
+  assert.equal(click('Ícone', 'ouvidoria'),true);assert.equal(click('Ícone','esic'),true);
+  assert.equal(click('Carta de Serviços'),false);assert.equal(click('Portal da Transparência'),false);
+  assert.deepEqual(destinations.map(url=>url.replace(new URL('./',base).href,'')),['esic/','esic/','ouvidoria/','ouvidoria/','ouvidoria/','esic/']);
  }
 });
 
-test('todos os nomes de e-SIC do portal interno apontam para a mesma aplicação',async()=>{
+test('portal interno encaminha Ouvidoria e e-SIC sem abrir o formulário legado',async()=>{
  const source=await read('www/portal-internal.js');
  const destinations=[];
  const window={location:{href:'https://portal.example/#ouvidoria',assign:url=>destinations.push(url)}};
@@ -37,7 +39,21 @@ test('todos os nomes de e-SIC do portal interno apontam para a mesma aplicação
  await window.ManariPortalInternal.open('Título alternativo','esic');
  assert.equal(destinations.length,5);
  assert(destinations.every(url=>url==='https://portal.example/esic/'));
+ for(const title of ['Ouvidoria','Ouvidoria Municipal'])await window.ManariPortalInternal.open(title);
+ await window.ManariPortalInternal.open('Título alternativo','ouvidoria');
+ assert.deepEqual(destinations.slice(5),Array(3).fill('https://portal.example/ouvidoria/'));
  assert.equal(window.ManariPortalInternal.moduleFor('Ouvidoria Municipal'),'ouvidoria');
+});
+
+test('rota antiga #ouvidoria também abre a aplicação nova antes de renderizar o portal',async()=>{
+ const source=await read('www/app.js');
+ const match=source.match(/async function render\(route, push=true, preservedScroll=null\)\{([\s\S]*?)currentRoute=route;/);assert(match);
+ for(const base of ['https://portal.example/#ouvidoria','https://portal.example/www/index.html#ouvidoria']){
+  const destinations=[];
+  const window={location:{href:base,assign:url=>destinations.push(url)}};
+  await vm.runInNewContext('(async function(route){'+match[1]+"throw new Error('render legado acessado')})('ouvidoria')",{window,URL});
+  assert.deepEqual(destinations,[new URL('./ouvidoria/',base).href]);
+ }
 });
 
 async function serviceWorker(scope='https://portal.example/') {
