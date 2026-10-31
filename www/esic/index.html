@@ -13,7 +13,7 @@
  <a class="skip" href="#conteudo">Pular para o conteúdo</a>
  <header class="topbar"><div class="wrap brand"><span class="brand-mark" aria-hidden="true">M</span><div><strong>PREFEITURA DE MANARI</strong><small>Serviço de Informação ao Cidadão</small></div><span class="test-tag">Homologação</span></div></header>
  <main id="conteudo" class="wrap">
-  <section id="account" class="account card" aria-label="Conta conectada" hidden><div><p>Você está conectado como<br><strong id="identity"></strong></p><small>Para usar outro e-mail, saia desta conta.</small></div><button id="logout" type="button">Sair da conta</button></section>
+  <section id="account" class="account card" aria-label="Conta conectada" hidden><div><p>Você está conectado como<br><strong id="identity"></strong></p><small>Para usar outro e-mail, saia desta conta.</small><div id="email-preference-control"><label class="checkbox-label"><input id="email-preference" type="checkbox" checked> Receber avisos dos meus protocolos por e-mail</label></div></div><button id="logout" type="button">Sair da conta</button></section>
   <div class="hero"><div><span class="eyebrow">ACESSO À INFORMAÇÃO</span><h1>Informação pública,<br>mais perto de você.</h1><p>Faça seu pedido, acompanhe o protocolo e consulte a resposta em um só lugar. Não é necessário justificar a solicitação.</p></div><div class="hero-symbol" aria-hidden="true">e-SIC<span>MANARI • PE</span></div></div>
   <p class="notice">Ambiente de homologação. Use dados fictícios durante os testes. O atendimento oficial existente permanece disponível.</p>
   <div id="status" class="status" role="status" aria-live="polite">Conectando ao serviço…</div>
@@ -46,7 +46,7 @@
     <div class="filter-actions"><button type="submit">Aplicar filtros</button><button id="queue-clear" class="secondary" type="button">Limpar filtros</button></div>
    </form>
    <p class="hint">Filtros por data de abertura, no horário de Brasília. Os indicadores e o gráfico seguem os filtros selecionados.</p>
-   <div id="dashboard-insights" hidden>
+   <div id="dashboard-insights" hidden><p id="deadline-summary" class="deadline-summary"></p>
     <div class="dashboard-stats" aria-label="Resumo dos chamados"><div><span>Total nos filtros</span><strong id="stat-total">0</strong></div><div><span>Em aberto</span><strong id="stat-open">0</strong><small>Recebidos e em análise</small></div><div><span>Respondidos</span><strong id="stat-answered">0</strong></div><div><span>Arquivados</span><strong id="stat-archived">0</strong></div></div>
     <figure class="department-chart"><figcaption id="department-chart-title">Chamados abertos por secretaria</figcaption><p class="hint">Secretaria escolhida ao abrir o pedido. Chamados respondidos e arquivados não entram neste gráfico.</p><div id="department-chart" aria-labelledby="department-chart-title"></div></figure>
    </div>
@@ -56,6 +56,29 @@
    <section id="admin-detail" class="admin-detail" hidden aria-label="Detalhes do chamado"><div class="detail-heading"><h3>Atender chamado</h3><button id="close-request" type="button" class="secondary">Fechar detalhes</button></div><div id="selected-request"></div>
     <form id="action"><h3>Registrar andamento</h3><label for="request-id">Protocolo selecionado</label><select id="request-id" name="request_id" required><option value="">Selecione um chamado na lista</option></select><label for="action-kind">Ação</label><select id="action-kind" name="action"><option value="encaminhar">Encaminhar a um setor</option><option value="responder">Responder ao cidadão</option><option value="arquivar">Arquivar após resposta</option><option value="reabrir">Reabrir atendimento</option></select><div id="department-field"><label for="department">Setor de destino</label><select id="department" name="department" required><option value="">Selecione a secretaria</option></select></div><div id="response-field" hidden><label for="response">Resposta ao cidadão</label><textarea id="response" name="response" minlength="10" maxlength="10000" rows="6"></textarea></div><button id="action-submit" type="submit">Salvar andamento</button></form>
    </section>
+
+   <section class="workflow-section" aria-labelledby="appeal-queue-title"><h3 id="appeal-queue-title">Recursos recentes</h3><p class="hint">Até 100 recursos mais recentes, independentes dos filtros dos chamados. A decisão depende da autoridade designada para cada instância.</p><div id="appeal-queue"></div></section>
+   <details class="workflow-section"><summary>Configurações do e-SIC</summary>
+    <p id="workflow-config-note" class="notice"></p><p class="hint">Parâmetros de homologação: confirme a regulamentação municipal antes de iniciar o atendimento oficial. Prazos em dias corridos, sem contar o dia do registro; o vencimento pode passar para o próximo dia de expediente. Mudanças valem para os novos prazos.</p>
+    <form id="workflow-settings"><div class="settings-grid">
+     <div><label for="cfg-response_days">Prazo de resposta (dias)</label><input id="cfg-response_days" type="number" min="1" max="60" required></div>
+     <div><label for="cfg-extension_days">Prorrogação adicional (dias)</label><input id="cfg-extension_days" type="number" min="1" max="30" required></div>
+     <div><label for="cfg-appeal_days">Prazo para recurso (dias)</label><input id="cfg-appeal_days" type="number" min="1" max="30" required></div>
+     <div><label for="cfg-decision_days">Prazo para decisão recursal (dias)</label><input id="cfg-decision_days" type="number" min="1" max="30" required></div>
+     <div><label for="cfg-appeal_levels">Quantidade de instâncias recursais</label><input id="cfg-appeal_levels" type="number" min="1" max="3" required></div>
+    </div><label class="checkbox-label"><input id="cfg-roll_weekends" type="checkbox" checked> Passar vencimentos de sábado e domingo para o próximo dia de expediente</label>
+    <label for="cfg-holidays">Dias sem expediente e feriados</label><textarea id="cfg-holidays" rows="3" placeholder="Uma data por linha, no formato AAAA-MM-DD"></textarea>
+    <label for="cfg-responsible">Responsável pelo e-SIC</label><select id="cfg-responsible"><option value="">A designar</option></select>
+    <label for="cfg-reviewer-1">Autoridade recursal — instância 1</label><select id="cfg-reviewer-1"><option value="">A designar</option></select>
+    <label for="cfg-reviewer-2">Autoridade recursal — instância 2</label><select id="cfg-reviewer-2"><option value="">A designar</option></select>
+    <label for="cfg-reviewer-3">Autoridade recursal — instância 3</label><select id="cfg-reviewer-3"><option value="">A designar</option></select>
+    <p class="hint">A lista contém as contas administrativas ativas do portal. A autoridade deve ser diferente do autor da resposta recorrida.</p><button type="submit">Salvar configurações</button></form>
+   </details>
+   <details class="workflow-section"><summary>Avisos por e-mail</summary><p id="mail-configuration-state" class="notice"></p>
+    <form id="mail-settings"><label for="mail-login">Login SMTP da Brevo</label><input id="mail-login" type="email" autocomplete="off" required maxlength="254"><label for="mail-sender">E-mail remetente verificado na Brevo</label><input id="mail-sender" type="email" required maxlength="254">
+    <label for="mail-password">Chave SMTP da Brevo</label><input id="mail-password" type="password" autocomplete="new-password" minlength="15" maxlength="128" aria-describedby="mail-password-help"><small id="mail-password-help">Cole a chave gerada na Brevo. Ela fica criptografada no servidor e não será exibida novamente. Deixe em branco para manter a chave atual.</small><button type="submit">Salvar envio de e-mail</button></form>
+    <button id="mail-test" class="secondary" type="button">Enviar teste para meu e-mail</button><p class="hint">Os avisos contêm apenas protocolo, tipo de atualização e link do portal. A resposta completa fica na conta do cidadão. O processamento ocorre a cada minuto, com até 250 avisos por dia e novas tentativas em caso de falha.</p>
+   </details>
   </section>
 
   <footer class="card contact"><h2>Precisa de ajuda?</h2><p>Ouvidoria Municipal de Manari</p><a href="mailto:ouvidoria-manari-pe2023@outlook.com">ouvidoria-manari-pe2023@outlook.com</a><a href="tel:08006669090">0800 666 9090</a><p>Dias úteis, das 8h às 13h.</p><small>Prefeitura Municipal de Manari • Pernambuco</small></footer>
