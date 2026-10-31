@@ -8,7 +8,7 @@ const codes=['educacao','obras','agricultura',null],statuses=['recebido','em_ana
 const rows=Array.from({length:34},(_,i)=>{
  const day=i<20?dateRangeForPreset('today').from:i<28?dateRangeForPreset('yesterday').from:dateRangeForPreset('week').from;
  const status=statuses[(i+Math.floor(i/4))%4];
- return {id:`76c046c7-78dd-4b73-8d53-${String(i+100).padStart(12,'0')}`,protocol:`TESTE-PAINEL-${String(i+1).padStart(3,'0')}`,citizen_id:i%5===0?adminId:citizenId,module:'esic',category:'geral',subject:`Pedido simulado ${String(i+1).padStart(2,'0')}`,description:'Informação fictícia para testar os filtros e o atendimento.',requested_department_code:codes[i%4],status,department:null,created_at:new Date(day+`T${String(8+i%10).padStart(2,'0')}:00:00-03:00`).toISOString(),response_text:status==='respondido'?'Resposta fictícia para o teste de interface.':null};
+ return {id:`76c046c7-78dd-4b73-8d53-${String(i+100).padStart(12,'0')}`,protocol:`TESTE-PAINEL-${String(i+1).padStart(3,'0')}`,citizen_id:i%5===0?adminId:citizenId,module:'esic',category:'geral',subject:`Pedido simulado ${String(i+1).padStart(2,'0')}`,description:'Informação fictícia para testar os filtros e o atendimento.',requested_department_code:codes[i%4],status,department:null,created_at:new Date(day+`T${String(8+i%10).padStart(2,'0')}:00:00-03:00`).toISOString(),responded_at:status==='respondido'?new Date().toISOString():null,response_text:status==='respondido'?'Resposta fictícia para o teste de interface.':null};
 });
 const events=[];
 function dashboard(p) {
@@ -23,6 +23,11 @@ const client={auth:{
 },
  from(table){let filters=[],inserted;return {select(){return this;},eq(key,value){filters.push([key,value]);return this;},insert(payload){inserted={...payload,id:'76c046c7-78dd-4b73-8d53-000000000999',protocol:'TESTE-NOVO-001',status:'recebido',created_at:new Date().toISOString()};rows.push(inserted);return this;},single:async()=>({data:inserted,error:null}),order:async()=>({data:table==='portal_departments'?departments:(table==='manari_digital_events'?events:rows).filter(r=>filters.every(([key,value])=>r[key]===value)),error:null})};},
  async rpc(name,p){
+  if(name==='manari_esic_history')return {data:events.filter(e=>e.request_id===p.p_request),error:null};
+  if(name==='manari_esic_snapshot')return {data:{today:manariDate(),settings:{response_days:20,extension_days:10,appeal_days:10,decision_days:5,appeal_levels:1,roll_weekends:true,mail_ready:false,reviewers_configured:[]},requests:rows.filter(r=>p.p_requests.includes(r.id)).map(r=>({id:r.id,due_date:dateRangeForPreset('today').from,extended_at:r.extended_at,extension_reason:r.extension_reason,response_read_at:r.response_read_at,appeal_deadline:'2099-01-01'})),appeals:[],mail:[],email_enabled:true,administration:{operators:[],reviewers:[],holidays:[],smtp_login:'demo@smtp-brevo.com',sender_email:'demo@example.invalid'}},error:null};
+  if(name==='manari_esic_acknowledge'){rows.find(r=>r.id===p.p_request).response_read_at=new Date().toISOString();return {data:{},error:null};}
+  if(name==='manari_esic_extend'){const r=rows.find(r=>r.id===p.p_request);r.extended_at=new Date().toISOString();r.extension_reason=p.p_reason;return {data:{},error:null};}
+  if(name==='manari_esic_email_preference')return {data:{},error:null};
   if(name==='is_portal_admin')return {data:admin&&Boolean(user),error:null};
   if(name==='manari_digital_admin_dashboard'){await new Promise(resolve=>setTimeout(resolve,p.p_department==='educacao'?1200:20));return {data:dashboard(p),error:null};}
   const row=rows.find(r=>r.id===p.p_request);if(!row||!admin||!user)return {error:Error('Não autorizado')};
