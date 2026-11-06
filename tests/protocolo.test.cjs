@@ -1,0 +1,11 @@
+const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');
+const html=fs.readFileSync('www/protocolo/index.html','utf8');
+const script=fs.readFileSync('www/protocolo/app.js','utf8');
+const css=fs.readFileSync('www/protocolo/styles.css','utf8');
+const sw=fs.readFileSync('www/service-worker.js','utf8');
+test('script do protocolo possui sintaxe válida',()=>assert.doesNotThrow(()=>new vm.Script(script)));
+test('formulários e telas essenciais existem',()=>{for(const id of ['login-form','create-form','action-form','upload-form','table-body','history','attachments','create-dialog','detail-dialog'])assert.match(html,new RegExp('id="'+id+'"'))});
+test('operação protegida pelo RPC e login',()=>{assert.match(script,/auth\.signInWithPassword/);assert.match(script,/rpc\('manari_protocolo'/);assert.match(script,/auth\.getUser\(\)/);assert.doesNotMatch(html,/app-icon|prefeitura de manari|brasão/i)});
+test('arquivos privados e filtros',()=>{assert.match(script,/protocolo-anexos/);assert.match(script,/10485760/);assert.match(script,/priority-filter/);assert.match(script,/report\(\)/)});
+test('service worker não intercepta protocolo',()=>{assert.match(sw,/isProtocoloPath/);assert.match(sw,/isRhPath\(url\.pathname\)\|\|isProtocoloPath\(url\.pathname\)/)});
+test('sem animações nem cores decorativas intensas',()=>{assert.doesNotMatch(css,/@keyframes|animation:/i);assert.match(css,/#132944/)});
