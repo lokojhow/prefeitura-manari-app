@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const URL='https://dxvqiiawthxwkypvsxci.supabase.co', KEY='sb_publishable_Zno2VuYH9oev89OpttorUA_wzNb0EP6';
+const SUPABASE_URL='https://dxvqiiawthxwkypvsxci.supabase.co', KEY='sb_publishable_Zno2VuYH9oev89OpttorUA_wzNb0EP6';
 const $=id=>document.getElementById(id), statusNames={rascunho:'Rascunho',enviado:'Enviado',recebido:'Recebido',pendente:'Pendente',concluido:'Concluído',cancelado:'Cancelado'}, priorityNames={normal:'Normal',media:'Média',alta:'Alta'};
 const state={client:null,profile:null,rows:[],sectors:[],filter:'todos',view:'processos',page:1,size:12,selected:null};
 const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -52,7 +52,7 @@ function report(){const rows=filtered(),heads=['Processo','Assunto','Origem','De
 async function load(){const result=await state.client.auth.getUser();if(result.error)throw result.error;if(!result.data.user){$('auth-view').hidden=false;$('app').hidden=true;return}
 state.userId=result.data.user.id;state.profile=await api('perfil');state.sectors=await api('setores');$('side-user').textContent=result.data.user.email||'Usuário';$('top-user').textContent=state.profile.admin?'Administrador':state.profile.setor;$('auth-view').hidden=true;$('app').hidden=false;await refresh()}
 async function init(){if(!window.supabase){$('login-status').textContent='Não foi possível carregar a conexão. Verifique a internet.';return}
-state.client=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+state.client=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true}});
 try{await load()}catch(e){$('auth-view').hidden=false;$('app').hidden=true;$('login-status').textContent=e.message||'Acesso negado';}
 }
 $('login-form').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const f=new FormData(e.target),r=await state.client.auth.signInWithPassword({email:f.get('email'),password:f.get('password')});if(r.error)throw r.error;await load()}catch(x){$('login-status').textContent=x.message||'Falha no acesso'}finally{b.disabled=false}};
