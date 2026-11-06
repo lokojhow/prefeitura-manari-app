@@ -10,7 +10,7 @@ Módulo independente do portal de Manari, sem identidade visual da Prefeitura ou
 - Dados reais aparecem apenas quando cadastrados; não há registros demonstrativos injetados.
 
 ## Segurança
-Banco Supabase: projeto `Manari conectado`; migrações aplicadas `protocolo_digital_processos_v1`, `protocolo_armazenamento_permissoes_v2`, `protocolo_storage_private_checks_v3`. Tabelas no esquema `protocolo_private` com RLS e sem acesso direto à Data API. RPC `manari_protocolo` aceita somente `authenticated` e verifica a equipe em cada operação. Bucket `protocolo-anexos` é privado e utiliza políticas de acesso por processo.
+Banco Supabase: projeto `Manari conectado`; migrações aplicadas `protocolo_digital_processos_v1`, `protocolo_armazenamento_permissoes_v2`, `protocolo_storage_private_checks_v3`, `protocolo_normalizar_setores_v4`. Tabelas no esquema `protocolo_private` com RLS e sem acesso direto à Data API. RPC `manari_protocolo` aceita somente `authenticated` e verifica a equipe em cada operação. Bucket `protocolo-anexos` é privado e utiliza políticas de acesso por processo.
 
 ## Publicação
 O repositório usa Cloudflare Workers com raiz de assets `www`, conforme a documentação preexistente em `ESIC-CLOUDFLARE.md`. O caminho esperado depois que o deploy da branch principal for concluído é `/protocolo/`. O service worker da homepage exclui explicitamente esse caminho para não reescrever a página.
