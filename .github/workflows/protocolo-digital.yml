@@ -1,0 +1,17 @@
+name: Validar Protocolo Digital
+on:
+  push:
+    branches: [main]
+    paths: ['www/protocolo/**','www/service-worker.js','tests/protocolo.test.cjs','.github/workflows/protocolo-digital.yml']
+  pull_request:
+    paths: ['www/protocolo/**','www/service-worker.js','tests/protocolo.test.cjs','.github/workflows/protocolo-digital.yml']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check www/protocolo/app.js
+      - run: node --test tests/protocolo.test.cjs
